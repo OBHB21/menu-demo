@@ -14,67 +14,101 @@
         .category-header { border-left: 6px solid #198754; padding-left: 12px; margin-top: 40px; margin-bottom: 20px; font-weight: bold; color: #1a4d34; }
         .notice-box { background-color: #fff3cd; border-radius: 12px; font-size: 0.85rem; border: 1px solid #ffe69c; }
         .cart-sticky { position: sticky; top: 90px; }
-        /* 浮動條滑出動畫 */
         #mobile-floating-bar { transition: transform 0.3s ease-in-out; transform: translateY(100%); }
         #mobile-floating-bar.show { transform: translateY(0); }
+        .receipt-card { background: white; border: none; border-radius: 24px; box-shadow: 0 15px 35px rgba(25,135,84,0.08); }
+        .receipt-dot-line { border-top: 2px dashed #ccc; height: 1px; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-<div class="sticky-top-nav bg-white p-2 mb-3">
-    <div class="container text-center mb-2">
-        <h2 class="fw-bold text-success m-0" style="letter-spacing: 2px;">蓮德品素天地</h2>
-        <small class="text-muted">中正區寧波西街82號 | 02-23926208</small>
-        <div class="mt-1"><span class="badge bg-success fs-6">桌號：<span id="table-display">偵測中...</span></span></div>
+<div id="main-layout">
+    <div class="sticky-top-nav bg-white p-2 mb-3">
+        <div class="container text-center mb-2">
+            <h2 class="fw-bold text-success m-0" style="letter-spacing: 2px;">蓮德品素天地</h2>
+            <small class="text-muted">中正區寧波西街82號 | 02-23926208</small>
+            <div class="mt-1"><span class="badge bg-success fs-6">桌號：<span id="table-display">偵測中...</span></span></div>
+        </div>
+        <div class="d-flex overflow-x-auto py-2 px-1 container text-center" style="gap: 5px; -webkit-overflow-scrolling: touch;">
+            <a href="#cat-0" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好鍋</a>
+            <a href="#cat-1" class="btn btn-sm btn-outline-success rounded-pill fw-bold">法式焗烤</a>
+            <a href="#cat-2" class="btn btn-sm btn-outline-success rounded-pill fw-bold">義式燉飯</a>
+            <a href="#cat-3" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好飯</a>
+            <a href="#cat-4" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好麵</a>
+            <a href="#cat-5" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素快餐</a>
+            <a href="#cat-6" class="btn btn-sm btn-outline-success rounded-pill fw-bold">松露系列</a>
+            <a href="#cat-7" class="btn btn-sm btn-outline-success rounded-pill fw-bold">炒泡麵</a>
+            <a href="#cat-8" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素拉麵</a>
+            <a href="#cat-9" class="btn btn-sm btn-outline-success rounded-pill fw-bold">香酥炸物</a>
+            <a href="#cat-10" class="btn btn-sm btn-outline-success rounded-pill fw-bold">臭豆腐</a>
+            <a href="#cat-11" class="btn btn-sm btn-outline-success rounded-pill fw-bold">湯品單點</a>
+            <a href="#cat-12" class="btn btn-sm btn-outline-success rounded-pill fw-bold">精選飲品</a>
+        </div>
     </div>
-    <div class="d-flex overflow-x-auto py-2 px-1 container text-center" style="gap: 5px; -webkit-overflow-scrolling: touch;">
-        <a href="#cat-0" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好鍋</a>
-        <a href="#cat-1" class="btn btn-sm btn-outline-success rounded-pill fw-bold">法式焗烤</a>
-        <a href="#cat-2" class="btn btn-sm btn-outline-success rounded-pill fw-bold">義式燉飯</a>
-        <a href="#cat-3" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好飯</a>
-        <a href="#cat-4" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好麵</a>
-        <a href="#cat-5" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素快餐</a>
-        <a href="#cat-6" class="btn btn-sm btn-outline-success rounded-pill fw-bold">松露系列</a>
-        <a href="#cat-7" class="btn btn-sm btn-outline-success rounded-pill fw-bold">炒泡麵</a>
-        <a href="#cat-8" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素拉麵</a>
-        <a href="#cat-9" class="btn btn-sm btn-outline-success rounded-pill fw-bold">香酥炸物</a>
-        <a href="#cat-10" class="btn btn-sm btn-outline-success rounded-pill fw-bold">臭豆腐</a>
-        <a href="#cat-11" class="btn btn-sm btn-outline-success rounded-pill fw-bold">湯品單點</a>
-        <a href="#cat-12" class="btn btn-sm btn-outline-success rounded-pill fw-bold">精選飲品</a>
+
+    <div class="container">
+        <div class="notice-box p-3 mb-4 shadow-sm text-dark">
+            <h6 class="fw-bold m-0 mb-1">⚠️ 店家重要公告與消費須知</h6>
+            <ul class="m-0 p-0 ps-3">
+                <li>每人最低消費 <strong>$120元</strong> / 請勿攜帶外食。</li>
+                <li>餐點皆為現點現做，請耐心等候。</li>
+                <li><strong>過敏提示：</strong>羅勒(青醬)餐點含有堅果成分，過敏者請勿食用。</li>
+                <li>店內餐點多為奶素，皆可客製化做成<strong>全素</strong>。</li>
+            </ul>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-7" id="menu-container"></div>
+            <div class="col-lg-5" id="desktop-cart-target">
+                <div class="card menu-card cart-sticky p-3 mt-4 mt-lg-0 bg-white">
+                    <h4 class="fw-bold text-dark border-bottom pb-2 mb-3">🛒 我的購物車</h4>
+                    <div id="cart-items" class="text-muted small mb-3" style="max-height: 350px; overflow-y: auto;">
+                        購物車空空如也...
+                    </div>
+                    <div id="discount-zone" class="text-success small fw-bold mb-2"></div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-bold text-secondary">總計金額:</span>
+                        <h3 class="fw-bold text-danger m-0">$<span id="cart-total">0</span></h3>
+                    </div>
+                    <button id="submit-btn" class="btn btn-danger w-100 btn-lg fw-bold rounded-3 py-2 shadow" disabled onclick="sendOrderToServer()">
+                        送出訂單到櫃檯
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="container">
-    <div class="notice-box p-3 mb-4 shadow-sm text-dark">
-        <h6 class="fw-bold m-0 mb-1">⚠️ 店家重要公告與消費須知</h6>
-        <ul class="m-0 p-0 ps-3">
-            <li>每人最低消費 <strong>$120元</strong> / 請勿攜帶外食。</li>
-            <li>餐點皆為現點現做，請耐心等候。</li>
-            <li><strong>過敏提示：</strong>羅勒(青醬)餐點含有堅果成分，過敏者請勿食用。</li>
-            <li>店內餐點多為奶素，皆可客製化做成<strong>全素</strong>。</li>
-        </ul>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-7" id="menu-container"></div>
-
-        <div class="col-lg-5" id="desktop-cart-target">
-            <div class="card menu-card cart-sticky p-3 mt-4 mt-lg-0 bg-white">
-                <h4 class="fw-bold text-dark border-bottom pb-2 mb-3">🛒 我的購物車</h4>
-                <div id="cart-items" class="text-muted small mb-3" style="max-height: 350px; overflow-y: auto;">
-                    購物車空空如也...
-                </div>
-                <div id="discount-zone" class="text-success small fw-bold mb-2"></div>
-                <hr class="my-2">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="fw-bold text-secondary">總計金額:</span>
-                    <h3 class="fw-bold text-danger m-0">$<span id="cart-total">0</span></h3>
-                </div>
-                <button id="submit-btn" class="btn btn-danger w-100 btn-lg fw-bold rounded-3 py-2 shadow" disabled onclick="sendOrderToServer()">
-                    送出訂單到廚房
-                </button>
+<div class="container py-5 d-none" id="receipt-layout" style="max-width: 550px;">
+    <div class="card receipt-card p-4 text-center">
+        <div class="text-warning mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-clock-history d-inline-block text-warning" viewBox="0 0 16 16">
+              <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 2.118a7 7 0 0 0-.307-.442l.834-.551c.124.187.238.382.342.582l-.869.411zM16 8A8 8 0 1 1 8 0a8 8 0 0 1 8 8"/>
+              <path d="M8.5 4.5a.5.5 0 0 0-1 0v3h3a.5.5 0 0 0 0-1H8.5z"/>
+            </svg>
+        </div>
+        <h3 class="fw-bold text-dark mb-1">訂單已成功送出！</h3>
+        <p class="text-warning small fw-bold">⏳ 請稍候，餐點將在櫃檯確認後開始製作</p>
+        
+        <div class="bg-light rounded-4 text-start p-3 mt-2 text-dark">
+            <div class="d-flex justify-content-between mb-2"><strong>最新單號：</strong><span id="rec-id" class="fw-bold text-secondary"></span></div>
+            <div class="d-flex justify-content-between mb-2"><strong>用餐桌號：</strong><span id="rec-table" class="badge bg-success fs-6 fw-bold"></span></div>
+            <div class="d-flex justify-content-between mb-3"><strong>更新時間：</strong><span id="rec-time" class="text-secondary small"></span></div>
+            
+            <div class="fw-bold mb-2 text-success small">📊 本桌歷史累計消費明細：</div>
+            <div id="rec-details" class="p-3 bg-white rounded-3 border text-dark mb-2" style="line-height: 1.7; font-size: 0.95rem;"></div>
+            
+            <div class="receipt-dot-line"></div>
+            <div class="d-flex justify-content-between align-items-center pt-1">
+                <span class="fw-bold text-success m-0">🧮 本桌累計應付總額：</span>
+                <h3 class="fw-bold text-danger m-0">$<span id="rec-total">0</span></h3>
             </div>
         </div>
+        
+        <button class="btn btn-success btn-lg w-100 fw-bold rounded-3 shadow-sm mt-4 py-2.5" onclick="backToMenuAndReset()">
+            ➕ 我要繼續加點餐點
+        </button>
     </div>
 </div>
 
@@ -91,9 +125,6 @@
 </div>
 
 <script>
-    // ==========================================
-    // 1. 全菜單結構資料庫
-    // ==========================================
     const menuData = [
         {
             category: "🍲 品素好鍋系列 (附飯、甜點一份)",
@@ -228,6 +259,8 @@
     ];
 
     let cart = [];
+    let orderHistory = []; 
+    let currentRound = 1;
 
     function startSystem() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -255,24 +288,18 @@
 
     function scrollToCart() {
         const target = document.getElementById('desktop-cart-target');
-        if(target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
+        if(target) { target.scrollIntoView({ behavior: 'smooth' }); }
     }
 
-    // 動態渲染菜單畫面
     function renderMenu() {
         const container = document.getElementById('menu-container');
         if (!container) return;
-        
         let html = '';
 
         menuData.forEach((cat, catIdx) => {
             html += `<h4 class="category-header" id="cat-${catIdx}">${cat.category}</h4>`;
-            
             cat.items.forEach((item, itemIdx) => {
                 const uniqueId = `${catIdx}-${itemIdx}`;
-                
                 html += `
                 <div class="card menu-card mb-3 bg-white">
                     <div class="card-body">
@@ -286,22 +313,18 @@
                                 <label class="form-check-label small fw-bold text-success" for="vegan-${uniqueId}">改全素</label>
                             </div>
                         </div>
-                        
                         <div class="row mt-2">
                 `;
-
                 if (cat.options && cat.options.length > 0) {
                     html += `<div class="col-6"><select class="form-select form-select-sm" id="opt-${uniqueId}">`;
                     cat.options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
                     html += `</select></div>`;
                 }
-
                 if (item.customOpts && item.customOpts.length > 0) {
                     html += `<div class="col-6"><select class="form-select form-select-sm" id="custom-${uniqueId}">`;
                     item.customOpts.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
                     html += `</select></div>`;
                 }
-
                 if (cat.allowCombo) {
                     html += `
                     <div class="col-12 mt-2 border-top pt-2">
@@ -336,7 +359,6 @@
                         </div>
                     </div>`;
                 }
-
                 html += `
                         </div>
                         <div class="d-flex align-items-center mt-2" style="gap: 10px;">
@@ -363,14 +385,9 @@
 
     function pushToCart(name, price, id, allowCombo, isFriedFood, event) {
         let details = [];
-        
-        if(document.getElementById(`vegan-${id}`).checked) {
-            details.push("做全素");
-        }
-
+        if(document.getElementById(`vegan-${id}`).checked) details.push("做全素");
         const optEl = document.getElementById(`opt-${id}`);
         if(optEl) details.push(optEl.value);
-
         const customEl = document.getElementById(`custom-${id}`);
         if(customEl) details.push(customEl.value);
 
@@ -383,7 +400,6 @@
                 if(comboEl.id.includes("comboA")) comboName = "A套餐";
                 if(comboEl.id.includes("comboB1")) comboName = "B餐(含玉米湯)";
                 if(comboEl.id.includes("comboB2")) comboName = "B餐(含甜點)";
-                
                 const sauce = document.querySelector(`input[name="sauce-${id}"]:checked`).value;
                 details.push(`${comboName}(${sauce})`);
             }
@@ -402,23 +418,18 @@
             isFriedFood: isFriedFood
         });
 
-        // 🌟 修正點：移除自動將數量重置回1的程式碼，數量會穩穩留在當下點的份數
-
-        // 按鈕加入成功的動態反饋
         const btn = event ? event.target : null;
         if(btn && btn.tagName === 'BUTTON') {
             const originalText = btn.innerText;
             btn.innerText = `🟢 已加入 ${qty} 份！`;
             btn.className = "btn btn-outline-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
             btn.disabled = true;
-            
             setTimeout(() => {
                 btn.innerText = originalText;
                 btn.className = "btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
                 btn.disabled = false;
             }, 1000);
         }
-
         updateCartUI();
     }
 
@@ -427,32 +438,21 @@
         updateCartUI();
     }
 
-    // 🌟 新增：點餐成功後，負責將菜單上所有勾選、份數一鍵全面重置的清除函數
     function resetAllMenuInputs() {
-        // 1. 將所有數量輸入框還原成 1
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            input.value = 1;
-        });
-        // 2. 將所有改全素開關切回未選取
-        document.querySelectorAll('.form-check-input[type="checkbox"]').forEach(cb => {
-            cb.checked = false;
-        });
-        // 3. 所有規格下拉選單歸位回第一個選項
-        document.querySelectorAll('select.form-select').forEach(select => {
-            select.selectedIndex = 0;
-        });
-        // 4. 所有套餐選項切回單點（value="0" 的項目勾選）
+        document.querySelectorAll('input[type="number"]').forEach(input => { input.value = 1; });
+        document.querySelectorAll('.form-check-input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+        document.querySelectorAll('select.form-select').forEach(select => { select.selectedIndex = 0; });
         document.querySelectorAll('input[name^="combo-"]').forEach(radio => {
-            if (radio.value === "0") {
-                radio.checked = true;
-            } else {
-                radio.checked = false;
-            }
+            if (radio.value === "0") { radio.checked = true; } else { radio.checked = false; }
         });
-        // 5. 將所有套餐的沙拉醬提示外殼隱藏
-        document.querySelectorAll('[id^="sauce-box-"]').forEach(box => {
-            box.className = "mt-2 d-none";
-        });
+        document.querySelectorAll('[id^="sauce-box-"]').forEach(box => { box.className = "mt-2 d-none"; });
+    }
+
+    function backToMenuAndReset() {
+        document.getElementById('receipt-layout').classList.add('d-none');
+        document.getElementById('main-layout').classList.remove('d-none');
+        resetAllMenuInputs();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function updateCartUI() {
@@ -460,7 +460,6 @@
         const totalSpan = document.getElementById('cart-total');
         const discountDiv = document.getElementById('discount-zone');
         const submitBtn = document.getElementById('submit-btn');
-        
         const mobileBar = document.getElementById('mobile-floating-bar');
         const mobileQty = document.getElementById('mobile-cart-qty');
         const mobileTotal = document.getElementById('mobile-cart-total');
@@ -483,7 +482,6 @@
             rawTotal += item.price;
             totalQty += item.qty;
             if(item.isFriedFood) friedCount += item.qty;
-            
             let specText = item.spec ? `<br><small class="text-secondary">└ ${item.spec}</small>` : "";
             html += `
             <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom text-dark">
@@ -497,12 +495,8 @@
 
         let discount = Math.floor(friedCount / 2) * 20;
         let finalTotal = rawTotal - discount;
-
-        if(discount > 0) {
-            discountDiv.innerHTML = `🎁 已自動套用【香酥頌雙件優惠】：已折抵 -$${discount}元`;
-        } else {
-            discountDiv.innerText = "";
-        }
+        if(discount > 0) discountDiv.innerHTML = `🎁 已自動套用【香酥頌雙件優惠】：已折抵 -$${discount}元`;
+        else discountDiv.innerText = "";
 
         itemsDiv.innerHTML = html;
         totalSpan.innerText = finalTotal;
@@ -515,56 +509,89 @@
         }
     }
 
-    // 打包丟上 Google 試算表
     function sendOrderToServer() {
         if(cart.length === 0) return;
-        
         const submitBtn = document.getElementById('submit-btn');
         submitBtn.disabled = true;
-        submitBtn.innerText = "正在同步至廚房...";
+        submitBtn.innerText = "正在傳送至櫃檯...";
 
-        const detailString = cart.map(item => {
+        const currentDetailString = cart.map(item => {
             let specStr = item.spec ? ` (${item.spec})` : '';
             return `• ${item.qty}x ${item.name}${specStr} $${item.price}`;
         }).join('\n');
 
         const urlParams = new URLSearchParams(window.location.search);
         const tableNo = urlParams.get('table') || "未偵測到桌號";
+        const generatedOrderId = "ORD-" + Date.now().toString().slice(-6);
 
         const orderData = {
-            order_id: "ORD-" + Date.now().toString().slice(-6),
+            order_id: generatedOrderId,
             table_no: tableNo,
-            items_detail: detailString,
+            items_detail: currentDetailString, 
             total_price: parseInt(document.getElementById('cart-total').innerText)
         };
 
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwOp4vY6kAR38iKnaRipBYBtO6iaHGIz3LTnh97MsOU8EuZjOk8k2v8C-sTZNSfgrcZ8g/exec";
 
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        })
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(orderData) })
         .then(res => res.json())
         .then(data => {
             if(data.status === "success") {
-                alert("🎉 點餐成功！廚房正在為您現點現做。");
+                cart.forEach(item => {
+                    orderHistory.push({
+                        name: item.name,
+                        spec: item.spec,
+                        qty: item.qty,
+                        price: item.price,
+                        round: currentRound
+                    });
+                });
+
+                let lastRound = 0;
+                let htmlDetail = "";
+                orderHistory.forEach(item => {
+                    if (item.round !== lastRound) {
+                        if (item.round === 1) {
+                            htmlDetail += `<div class="fw-bold text-success border-bottom pb-1 mb-2 mt-2" style="font-size:1.05rem;">🌱 第一次點餐明細：</div>`;
+                        } else {
+                            htmlDetail += `<div class="fw-bold text-warning border-bottom pb-1 mt-4 mb-2" style="font-size:1.05rem;">⚡ 第 ${item.round - 1} 次加點明細：</div>`;
+                        }
+                        lastRound = item.round;
+                    }
+                    let specStr = item.spec ? `<br><small class="text-secondary" style="font-size:0.8rem;">└ ${item.spec}</small>` : '';
+                    htmlDetail += `<div class="d-flex justify-content-between align-items-start mb-2 px-1">
+                        <span>• ${item.name} <span class="badge bg-light text-dark border">x${item.qty}</span>${specStr}</span>
+                        <span class="fw-bold text-dark">$${item.price}</span>
+                    </div>`;
+                });
+
+                const historyTotalMoney = orderHistory.reduce((sum, item) => sum + item.price, 0);
+
+                document.getElementById('rec-id').innerText = generatedOrderId;
+                document.getElementById('rec-table').innerText = tableNo + " 桌";
+                document.getElementById('rec-time').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('rec-details').innerHTML = htmlDetail; 
+                document.getElementById('rec-total').innerText = historyTotalMoney;
+
+                document.getElementById('main-layout').classList.add('d-none');
+                document.getElementById('mobile-floating-bar').style.display = 'none';
+                document.getElementById('receipt-layout').classList.remove('d-none');
+                
+                currentRound++;
                 cart = [];
                 updateCartUI();
-                
-                // 🌟 修正點：訂單送出成功後，立刻啟動大掃除機制，把所有選單控制項全面歸位重置！
-                resetAllMenuInputs();
-                
-                submitBtn.innerText = "送出訂單到廚房";
+                window.scrollTo(0, 0);
+                submitBtn.innerText = "送出訂單到櫃檯";
             } else {
                 alert("發送失敗：" + data.message);
                 submitBtn.disabled = false;
-                submitBtn.innerText = "送出訂單到廚房";
+                submitBtn.innerText = "送出訂單到櫃檯";
             }
         })
         .catch(error => {
             alert("網路發送失敗，請確認連線！");
             submitBtn.disabled = false;
-            submitBtn.innerText = "送出訂單到廚房";
+            submitBtn.innerText = "送出訂單到櫃檯";
         });
     }
 </script>
