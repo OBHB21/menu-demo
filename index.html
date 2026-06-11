@@ -85,7 +85,7 @@
             <h4 class="fw-bold text-danger m-0">$<span id="mobile-cart-total">0</span></h4>
         </div>
         <button class="btn btn-success fw-bold px-4 py-2 rounded-3 shadow-sm btn-sm" onclick="scrollToCart()">
-            🛒 點此查看 / 結帳
+            🛒 查看 / 結帳
         </button>
     </div>
 </div>
@@ -229,13 +229,20 @@
 
     let cart = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // 🌟 核心防禦修正：用最高規格的異步狀態檢查，徹底消滅載入時間差 Bug
+    function startSystem() {
         const urlParams = new URLSearchParams(window.location.search);
         const tableNo = urlParams.get('table') || "未偵測到桌號";
         const tableDisplay = document.getElementById('table-display');
         if (tableDisplay) tableDisplay.innerText = tableNo;
         renderMenu();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startSystem);
+    } else {
+        startSystem(); // 萬一 DOM 早就載入好了，直接強行啟動！
+    }
 
     // 數量控制按鈕
     function plusQty(id) {
@@ -248,7 +255,7 @@
         if(input && parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
     }
 
-    // 🌟 新增：手機版底部一鍵平滑滾動到購物車
+    // 手機底部一鍵平滑滾動到購物車
     function scrollToCart() {
         const target = document.getElementById('desktop-cart-target');
         if(target) {
@@ -341,7 +348,7 @@
                                 <input type="number" class="form-control text-center fw-bold text-success" id="qty-${uniqueId}" value="1" min="1" readonly>
                                 <button class="btn btn-outline-success" type="button" onclick="plusQty('${uniqueId}')">+</button>
                             </div>
-                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-1.5" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false})">
+                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false})">
                                 加入購物車
                             </button>
                         </div>
@@ -399,7 +406,7 @@
             isFriedFood: isFriedFood
         });
 
-        if(qtyEl) qtyEl.value = 1; // 重置
+        if(qtyEl) qtyEl.value = 1;
 
         updateCartUI();
     }
@@ -415,7 +422,6 @@
         const discountDiv = document.getElementById('discount-zone');
         const submitBtn = document.getElementById('submit-btn');
         
-        // 🌟 獲取手機版浮動控制元件
         const mobileBar = document.getElementById('mobile-floating-bar');
         const mobileQty = document.getElementById('mobile-cart-qty');
         const mobileTotal = document.getElementById('mobile-cart-total');
@@ -425,15 +431,13 @@
             totalSpan.innerText = "0";
             discountDiv.innerText = "";
             submitBtn.disabled = true;
-            
-            // 🌟 購物車清空時，隱藏手機底部浮動條
             if(mobileBar) mobileBar.style.display = 'none';
             return;
         }
 
         let rawTotal = 0;
         let friedCount = 0;
-        let totalQty = 0; // 🌟 用來記錄總共點了幾份餐點
+        let totalQty = 0;
         let html = "";
 
         cart.forEach(item => {
@@ -442,3 +446,84 @@
             if(item.isFriedFood) friedCount += item.qty;
             
             let specText = item.spec ? `<br><small class="text-secondary">└ ${item.spec}</small>` : "";
+            html += `
+            <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom text-dark">
+                <div>
+                    <span class="fw-bold">${item.name}</span> <span class="badge bg-secondary">x${item.qty}</span>${specText}
+                    <div class="text-danger fw-bold">$${item.price}</div>
+                </div>
+                <button class="btn btn-sm btn-link text-danger text-decoration-none" onclick="removeCartItem('${item.cartId}')">刪除</button>
+            </div>`;
+        });
+
+        let discount = Math.floor(friedCount / 2) * 20;
+        let finalTotal = rawTotal - discount;
+
+        if(discount > 0) {
+            discountDiv.innerHTML = `🎁 已自動套用【香酥頌雙件優惠】：已折抵 -$${discount}元`;
+        } else {
+            discountDiv.innerText = "";
+        }
+
+        itemsDiv.innerHTML = html;
+        totalSpan.innerText = finalTotal;
+        submitBtn.disabled = false;
+
+        if(mobileBar) {
+            mobileBar.style.display = 'block';
+            if(mobileQty) mobileQty.innerText = totalQty;
+            if(mobileTotal) mobileTotal.innerText = finalTotal;
+        }
+    }
+
+    // 打包丟上 Google 試算表
+    function sendOrderToServer() {
+        if(cart.length === 0) return;
+        
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "正在同步至廚房...";
+
+        const detailString = cart.map(item => {
+            let specStr = item.spec ? ` (${item.spec})` : '';
+            return `• ${item.qty}x ${item.name}${specStr} $${item.price}`;
+        }).join('\n');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tableNo = urlParams.get('table') || "未偵測到桌號";
+
+        const orderData = {
+            order_id: "ORD-" + Date.now().toString().slice(-6),
+            table_no: tableNo,
+            items_detail: detailString,
+            total_price: parseInt(document.getElementById('cart-total').innerText)
+        };
+
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwOp4vY6kAR38iKnaRipBYBtO6iaHGIz3LTnh97MsOU8EuZjOk8k2v8C-sTZNSfgrcZ8g/exec";
+
+        fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify(orderData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                alert("🎉 點餐成功！廚房正在為您現點現做。");
+                cart = [];
+                updateCartUI();
+                submitBtn.innerText = "送出訂單到廚房";
+            } else {
+                alert("發送失敗：" + data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送出訂單到廚房";
+            }
+        })
+        .catch(error => {
+            alert("網路發送失敗，請確認連線！");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "送出訂單到廚房";
+        });
+    }
+</script>
+</body>
+</html>
