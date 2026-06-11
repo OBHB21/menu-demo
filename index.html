@@ -150,6 +150,9 @@
 </div>
 
 <script>
+    // ==========================================
+    // 1. 完整菜單結構資料庫
+    // ==========================================
     const menuData = [
         {
             category: "🍲 品素好鍋系列 (附飯、甜點一份)",
@@ -287,46 +290,60 @@
     let orderHistory = []; 
     let currentRound = 1;
 
-    // 🌟 核心升級：啟動時讀取快取，完美還原刷新前的狀態
+    // 🌟 核心防禦升級：全面加上 try-catch 防護罩，杜絕一切快取髒資料引發的死鎖
     function startSystem() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tableNo = urlParams.get('table') || "未偵測到桌號";
-        const tableDisplay = document.getElementById('table-display');
-        if (tableDisplay) tableDisplay.innerText = tableNo;
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableNo = urlParams.get('table') || "未偵測到桌號";
+            const tableDisplay = document.getElementById('table-display');
+            if (tableDisplay) tableDisplay.innerText = tableNo;
 
-        // 讀取 LocalStorage
-        const storedTable = localStorage.getItem('ld_table_no');
-        const storedTimestamp = localStorage.getItem('ld_last_timestamp');
-        const now = Date.now();
+            const storedTable = localStorage.getItem('ld_table_no');
+            const storedTimestamp = localStorage.getItem('ld_last_timestamp');
+            const now = Date.now();
 
-        // 🚀 防護牆：如果換桌了，或上一單點餐超過4小時(14400000ms)，自動當作全新客人清除快取
-        if (storedTable !== tableNo || (storedTimestamp && (now - parseInt(storedTimestamp) > 14400000))) {
+            // 防護：換桌或超時自動清空
+            if (storedTable !== tableNo || (storedTimestamp && (now - parseInt(storedTimestamp) > 14400000))) {
+                localStorage.clear();
+                orderHistory = [];
+                currentRound = 1;
+                localStorage.setItem('ld_table_no', tableNo);
+                localStorage.setItem('ld_current_view', 'menu');
+            } else {
+                // 用 try-catch 保護 JSON 解析，防止任何不合法測試資料摧毀主程式
+                try {
+                    orderHistory = JSON.parse(localStorage.getItem('ld_order_history')) || [];
+                } catch(err) {
+                    orderHistory = [];
+                }
+                currentRound = parseInt(localStorage.getItem('ld_current_round')) || 1;
+            }
+
+            // 確保無論如何都會強制把選單畫出來！
+            renderMenu();
+
+            const savedView = localStorage.getItem('ld_current_view') || 'menu';
+            if (savedView === 'receipt' && orderHistory.length > 0) {
+                renderHistoryReceiptUI(tableNo);
+                document.getElementById('main-layout').classList.add('d-none');
+                document.getElementById('mobile-floating-bar').style.display = 'none';
+                document.getElementById('receipt-layout').classList.remove('d-none');
+            } else {
+                document.getElementById('main-layout').classList.remove('d-none');
+                document.getElementById('receipt-layout').classList.add('d-none');
+            }
+        } catch (globalError) {
+            // 萬一發生任何不可預期錯誤，終極保底方案：重置快取並強制加載大菜單
+            console.error("系統自動修復中:", globalError);
             localStorage.clear();
             orderHistory = [];
             currentRound = 1;
-            localStorage.setItem('ld_table_no', tableNo);
-            localStorage.setItem('ld_current_view', 'menu');
-        } else {
-            orderHistory = JSON.parse(localStorage.getItem('ld_order_history')) || [];
-            currentRound = parseInt(localStorage.getItem('ld_current_round')) || 1;
-        }
-
-        renderMenu();
-
-        // 還原刷新前的視窗定位
-        const savedView = localStorage.getItem('ld_current_view') || 'menu';
-        if (savedView === 'receipt' && orderHistory.length > 0) {
-            renderHistoryReceiptUI(tableNo);
-            document.getElementById('main-layout').classList.add('d-none');
-            document.getElementById('mobile-floating-bar').style.display = 'none';
-            document.getElementById('receipt-layout').classList.remove('d-none');
-        } else {
+            renderMenu();
             document.getElementById('main-layout').classList.remove('d-none');
             document.getElementById('receipt-layout').classList.add('d-none');
         }
     }
 
-    // 🌟 新增：專門負責把 LocalStorage 的資料重新渲染成收據小白單的函數
     function renderHistoryReceiptUI(tableNo) {
         let lastRound = 0;
         let htmlDetail = "";
@@ -376,9 +393,163 @@
         if(target) { target.scrollIntoView({ behavior: 'smooth' }); }
     }
 
-    function toggleSauce(id, show) {
-        const box = document.getElementById(`sauce-box-${id}`);
-        if(box) box.className = show ? "mt-2" : "mt-2 d-none";
+    function renderMenu() {
+        const container = document.getElementById('menu-container');
+        if (!container) return;
+        let html = '';
+
+        menuData.forEach((cat, catIdx) => {
+            html += `<h4 class="category-header" id="cat-${catIdx}">${cat.category}</h4>`;
+            
+            cat.items.forEach((item, itemIdx) => {
+                const uniqueId = `${catIdx}-${itemIdx}`;
+                
+                html += `
+                <div class="card menu-card mb-3 bg-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold m-0 text-dark">${item.name}</h6>
+                                <span class="text-danger small fw-bold">$${item.price}</span>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" id="vegan-${uniqueId}">
+                                <label class="form-check-label small fw-bold text-success" for="vegan-${uniqueId}">改全素</label>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                `;
+
+                if (cat.options && cat.options.length > 0) {
+                    html += `<div class="col-6"><select class="form-select form-select-sm" id="opt-${uniqueId}">`;
+                    cat.options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                    html += `</select></div>`;
+                }
+
+                if (item.customOpts && item.customOpts.length > 0) {
+                    html += `<div class="col-6"><select class="form-select form-select-sm" id="custom-${uniqueId}">`;
+                    item.customOpts.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                    html += `</select></div>`;
+                }
+
+                if (cat.allowCombo) {
+                    html += `
+                    <div class="col-12 mt-2 border-top pt-2">
+                        <div class="d-flex flex-wrap" style="gap: 10px;">
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="none-${uniqueId}" value="0" checked onchange="toggleSauce('${uniqueId}', false)">
+                                <label class="form-check-label small" for="none-${uniqueId}">單點</label>
+                            </div>
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboA-${uniqueId}" value="180" onchange="toggleSauce('${uniqueId}', true)">
+                                <label class="form-check-label small" for="comboA-${uniqueId}">+180 A套餐</label>
+                            </div>
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB1-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
+                                <label class="form-check-label small" for="comboB1-${uniqueId}">+80 B餐(湯)</label>
+                            </div>
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB2-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
+                                <label class="form-check-label small" for="comboB2-${uniqueId}">+80 B餐(甜點)</label>
+                            </div>
+                        </div>
+                        <div class="mt-2 d-none" id="sauce-box-${uniqueId}">
+                            <label class="small fw-bold text-secondary">🥗 套餐沙拉醬：</label>
+                            <div class="form-check form-check-inline ms-2">
+                                <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce1-${uniqueId}" value="千島醬" checked>
+                                <label class="form-check-label small" for="sauce1-${uniqueId}">千島醬</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce2-${uniqueId}" value="和風醬">
+                                <label class="form-check-label small" for="sauce2-${uniqueId}">和風醬</label>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+
+                html += `
+                        </div>
+                        <div class="d-flex align-items-center mt-2" style="gap: 10px;">
+                            <div class="input-group input-group-sm" style="width: 110px;">
+                                <button class="btn btn-outline-success" type="button" onclick="minusQty('${uniqueId}')">-</button>
+                                <input type="number" class="form-control text-center fw-bold text-success" id="qty-${uniqueId}" value="1" min="1" readonly>
+                                <button class="btn btn-outline-success" type="button" onclick="plusQty('${uniqueId}')">+</button>
+                            </div>
+                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false}, event)">
+                                加入購物車
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        });
+        container.innerHTML = html;
+    }
+
+    function pushToCart(name, price, id, allowCombo, isFriedFood, event) {
+        let details = [];
+        if(document.getElementById(`vegan-${id}`).checked) details.push("做全素");
+        const optEl = document.getElementById(`opt-${id}`);
+        if(optEl) details.push(optEl.value);
+        const customEl = document.getElementById(`custom-${id}`);
+        if(customEl) details.push(customEl.value);
+
+        let extraPrice = 0;
+        if(allowCombo) {
+            const comboEl = document.querySelector(`input[name="combo-${id}"]:checked`);
+            if(comboEl && comboEl.value !== "0") {
+                extraPrice = parseInt(comboEl.value);
+                let comboName = "";
+                if(comboEl.id.includes("comboA")) comboName = "A套餐";
+                if(comboEl.id.includes("comboB1")) comboName = "B餐(含玉米湯)";
+                if(comboEl.id.includes("comboB2")) comboName = "B餐(含甜點)";
+                const sauce = document.querySelector(`input[name="sauce-${id}"]:checked`).value;
+                details.push(`${comboName}(${sauce})`);
+            }
+        }
+
+        const qtyEl = document.getElementById(`qty-${id}`);
+        const qty = qtyEl ? parseInt(qtyEl.value) : 1;
+        const unitPrice = price + extraPrice;
+
+        cart.push({
+            cartId: Date.now() + Math.random().toString(36).substring(2, 5),
+            name: name,
+            spec: details.join(', '),
+            qty: qty,
+            price: unitPrice * qty,
+            isFriedFood: isFriedFood
+        });
+
+        const btn = event ? event.target : null;
+        if(btn && btn.tagName === 'BUTTON') {
+            const originalText = btn.innerText;
+            btn.innerText = `🟢 已加入 ${qty} 份！`;
+            btn.className = "btn btn-outline-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.className = "btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
+                btn.disabled = false;
+            }, 1000);
+        }
+        updateCartUI();
+    }
+
+    function removeCartItem(cartId) {
+        cart = cart.filter(i => i.cartId !== cartId);
+        updateCartUI();
+    }
+
+    function resetAllMenuInputs() {
+        document.querySelectorAll('input[type="number"]').forEach(input => { input.value = 1; });
+        document.querySelectorAll('.form-check-input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+        document.querySelectorAll('select.form-select').forEach(select => { select.selectedIndex = 0; });
+        document.querySelectorAll('input[name^="combo-"]').forEach(radio => {
+            if (radio.value === "0") { radio.checked = true; } else { radio.checked = false; }
+        });
+        document.querySelectorAll('[id^="sauce-box-"]').forEach(box => { box.className = "mt-2 d-none"; });
     }
 
     function updateCartUI() {
@@ -453,18 +624,6 @@
         }
     }
 
-    // 我要繼續加點按鈕
-    function backToMenuAndReset() {
-        // 🌟 更新 LocalStorage 狀態為選單視角
-        localStorage.setItem('ld_current_view', 'menu');
-        
-        document.getElementById('receipt-layout').classList.add('d-none');
-        document.getElementById('main-layout').classList.remove('d-none');
-        resetAllMenuInputs();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // 送出訂單到櫃檯
     function sendOrderToServer() {
         if(cart.length === 0) return;
         const submitBtn = document.getElementById('submit-btn');
@@ -507,7 +666,6 @@
 
                 const timeStringNow = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                // 🌟 核心升級：將關鍵收據資訊寫入手機硬碟快取空間
                 localStorage.setItem('ld_last_order_id', generatedOrderId);
                 localStorage.setItem('ld_last_order_time', timeStringNow);
                 localStorage.setItem('ld_last_timestamp', Date.now().toString());
@@ -515,10 +673,8 @@
                 localStorage.setItem('ld_current_round', (currentRound + 1).toString());
                 localStorage.setItem('ld_current_view', 'receipt');
 
-                // 繪製歷史分層明細畫面
                 renderHistoryReceiptUI(tableNo);
 
-                // 面板秒切換
                 document.getElementById('main-layout').classList.add('d-none');
                 document.getElementById('mobile-floating-bar').style.display = 'none';
                 document.getElementById('receipt-layout').classList.remove('d-none');
