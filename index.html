@@ -80,31 +80,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true" style="z-index: 1040;">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
-        <div class="modal-content text-dark rounded-4 border-0 shadow-lg">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h4 class="modal-title fw-bold text-success" id="cartModalLabel">🛒 確認您的餐點</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3">
-                <div id="modal-cart-items" class="mb-3"></div>
-                <div id="modal-discount-zone" class="text-success small fw-bold mb-2"></div>
-                <hr class="my-2">
-                <div class="d-flex justify-content-between align-items-center pt-2">
-                    <span class="fw-bold text-secondary">總計金額：</span>
-                    <h3 class="fw-bold text-danger m-0">$<span id="modal-cart-total">0</span></h3>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0 pt-0">
-                <button id="modal-submit-btn" class="btn btn-danger w-100 btn-lg fw-bold rounded-3 py-2.5 shadow" onclick="sendOrderToServer()">
-                    確認無誤 ─ 送出訂單
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="container py-5 d-none" id="receipt-layout" style="max-width: 550px;">
     <div class="card receipt-card p-4 text-center">
         <div class="text-warning mb-3">
@@ -146,6 +121,31 @@
         <button class="btn btn-success fw-bold px-4 py-2 rounded-3 shadow-sm btn-sm" data-bs-toggle="modal" data-bs-target="#cartModal">
             🛒 查看購物車
         </button>
+    </div>
+</div>
+
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
+        <div class="modal-content text-dark rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h4 class="modal-title fw-bold text-success" id="cartModalLabel">🛒 確認您的餐點</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <div id="modal-cart-items" class="mb-3"></div>
+                <div id="modal-discount-zone" class="text-success small fw-bold mb-2"></div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center pt-2">
+                    <span class="fw-bold text-secondary">總計金額：</span>
+                    <h3 class="fw-bold text-danger m-0">$<span id="modal-cart-total">0</span></h3>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button id="modal-submit-btn" class="btn btn-danger w-100 btn-lg fw-bold rounded-3 py-2.5 shadow" onclick="sendOrderToServer()">
+                    確認無誤 ─ 送出訂單
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -476,7 +476,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 🌟 核心重構：讓資料同時渲染至「桌機右側欄」與「手機彈出視窗」中
     function updateCartUI() {
         const itemsDiv = document.getElementById('cart-items');
         const totalSpan = document.getElementById('cart-total');
@@ -502,10 +501,8 @@
             if(modalDiscountDiv) modalDiscountDiv.innerText = "";
             if(submitBtn) submitBtn.disabled = true;
             if(modalSubmitBtn) modalSubmitBtn.disabled = true;
-            
             if(mobileBar) mobileBar.style.display = 'none';
             
-            // 點餐完或全刪光時，自動把手機彈出視窗關閉
             try {
                 var cartModalEl = document.getElementById('cartModal');
                 var modalInstance = bootstrap.Modal.getInstance(cartModalEl);
@@ -536,18 +533,14 @@
 
         let discount = Math.floor(friedCount / 2) * 20;
         let finalTotal = rawTotal - discount;
-        
         const discountText = discount > 0 ? `🎁 已自動套用【香酥頌雙件優惠】：已折抵 -$${discount}元` : "";
         
         if(discountDiv) discountDiv.innerHTML = discountText;
         if(modalDiscountDiv) modalDiscountDiv.innerHTML = discountText;
-
         if(itemsDiv) itemsDiv.innerHTML = html;
         if(modalItemsDiv) modalItemsDiv.innerHTML = html;
-        
         if(totalSpan) totalSpan.innerText = finalTotal;
         if(modalTotalSpan) modalTotalSpan.innerText = finalTotal;
-        
         if(submitBtn) submitBtn.disabled = false;
         if(modalSubmitBtn) modalSubmitBtn.disabled = false;
 
@@ -558,10 +551,8 @@
         }
     }
 
-    // 打包丟上 Google 試算表
     function sendOrderToServer() {
         if(cart.length === 0) return;
-        
         const submitBtn = document.getElementById('submit-btn');
         const modalSubmitBtn = document.getElementById('modal-submit-btn');
         
@@ -626,16 +617,14 @@
                 document.getElementById('rec-details').innerHTML = htmlDetail; 
                 document.getElementById('rec-total').innerText = historyTotalMoney;
 
-                // 面板切換：隱藏主頁與底部欄、秀出收據明細
                 document.getElementById('main-layout').classList.add('d-none');
                 document.getElementById('mobile-floating-bar').style.display = 'none';
                 document.getElementById('receipt-layout').classList.remove('d-none');
                 
                 currentRound++;
                 cart = [];
-                updateCartUI(); // 這裏面會自動隱藏手機彈窗
+                updateCartUI(); 
                 window.scrollTo(0, 0);
-                
                 if(submitBtn) submitBtn.innerText = "送出訂單到櫃檯";
                 if(modalSubmitBtn) modalSubmitBtn.innerText = "確認無誤 ─ 送出訂單";
             } else {
