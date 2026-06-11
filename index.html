@@ -3,148 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蓮德品素天地 - 線上點餐</title>
+    <title>蓮德品素天地 - 智慧點餐系統</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: "Microsoft JhengHei", sans-serif; }
-        .menu-card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .cart-sticky { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        body { background-color: #f3f7f4; font-family: "Microsoft JhengHei", sans-serif; padding-bottom: 60px; }
+        .sticky-top-nav { position: sticky; top: 0; z-index: 1020; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .nav-pills .nav-link.active { background-color: #198754; }
+        .nav-pills .nav-link { color: #198754; font-weight: bold; white-space: nowrap; }
+        .menu-card { border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); overflow: hidden; }
+        .category-header { border-left: 6px solid #198754; padding-left: 12px; margin-top: 40px; margin-bottom: 20px; font-weight: bold; color: #1a4d34; }
+        .notice-box { background-color: #fff3cd; border-radius: 12px; font-size: 0.85rem; border: 1px solid #ffe69c; }
+        .cart-sticky { position: sticky; top: 90px; }
     </style>
 </head>
 <body>
 
-<div class="container py-4" style="max-width: 600px;">
-    <div class="text-center mb-4">
-        <h1 class="fw-bold text-success">蓮德品素天地</h1>
-        <p class="text-muted">台北市中正區寧波西街82號</p>
-        <div class="alert alert-info">目前桌號：<strong id="table-display">偵測中...</strong></div>
+<div class="sticky-top-nav bg-white p-2 mb-3">
+    <div class="container text-center mb-2">
+        <h2 class="fw-bold text-success m-0" style="letter-spacing: 2px;">蓮德品素天地</h2>
+        <small class="text-muted">中正區寧波西街82號 | 02-23926208</small>
+        <div class="mt-1"><span class="badge bg-success fs-6">桌號：<span id="table-display">偵測中</span></span></div>
+    </div>
+    <div class="d-flex overflow-x-auto py-2 px-1 container text-center" style="gap: 5px; -webkit-overflow-scrolling: touch;">
+        <a href="#cat-0" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好鍋</a>
+        <a href="#cat-1" class="btn btn-sm btn-outline-success rounded-pill fw-bold">法式焗烤</a>
+        <a href="#cat-2" class="btn btn-sm btn-outline-success rounded-pill fw-bold">義式燉飯</a>
+        <a href="#cat-3" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好飯</a>
+        <a href="#cat-4" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好麵</a>
+        <a href="#cat-5" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素快餐</a>
+        <a href="#cat-6" class="btn btn-sm btn-outline-success rounded-pill fw-bold">松露系列</a>
+        <a href="#cat-7" class="btn btn-sm btn-outline-success rounded-pill fw-bold">炒泡麵</a>
+        <a href="#cat-8" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素拉麵</a>
+        <a href="#cat-9" class="btn btn-sm btn-outline-success rounded-pill fw-bold">香酥炸物</a>
+        <a href="#cat-10" class="btn btn-sm btn-outline-success rounded-pill fw-bold">臭豆腐</a>
+        <a href="#cat-11" class="btn btn-sm btn-outline-success rounded-pill fw-bold">湯品單點</a>
+        <a href="#cat-12" class="btn btn-sm btn-outline-success rounded-pill fw-bold">精選飲品</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="notice-box p-3 mb-4 shadow-sm text-dark">
+        <h6 class="fw-bold m-0 mb-1">⚠️ 店家重要公告與消費須知</h6>
+        <ul class="m-0 p-0 ps-3">
+            <li>每人最低消費 <strong>$120元</strong> / 請勿攜帶外食。</li>
+            <li>餐點皆為現點現做，請耐心等候。</li>
+            <li><strong>過敏提示：</strong>羅勒(青醬)餐點含有堅果成分，過敏者請勿食用。</li>
+            <li>店內餐點多為奶素，皆可客製化做成<strong>全素</strong>。</li>
+        </ul>
     </div>
 
-    <h3 class="border-start border-4 border-success ps-2 mb-3">法式焗烤系列 $250</h3>
-    
-    <div class="card menu-card mb-3">
-        <div class="card-body">
-            <h5 class="card-title fw-bold">南瓜焗飯 / 麵</h5>
-            <p class="card-text text-muted small">請選擇主食與是否升級套餐</p>
-            
-            <div class="mb-3">
-                <label class="form-label small fw-bold text-secondary">1. 選擇主食：</label><br>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="main-type" id="main-rice" value="飯" checked>
-                    <label class="form-check-label" for="main-rice">飯</label>
+    <div class="row">
+        <div class="col-lg-7" id="menu-container"></div>
+
+        <div class="col-lg-5">
+            <div class="card menu-card cart-sticky p-3 mt-4 mt-lg-0 bg-white">
+                <h4 class="fw-bold text-dark border-bottom pb-2 mb-3">🛒 我的購物車</h4>
+                <div id="cart-items" class="text-muted small mb-3" style="max-height: 350px; overflow-y: auto;">
+                    購物車空空如也...
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="main-type" id="main-noodle" value="麵">
-                    <label class="form-check-label" for="main-noodle">麵</label>
+                <div id="discount-zone" class="text-success small fw-bold mb-2"></div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold text-secondary">總計金額:</span>
+                    <h3 class="fw-bold text-danger m-0">$<span id="cart-total">0</span></h3>
                 </div>
+                <button id="submit-btn" class="btn btn-danger w-100 btn-lg fw-bold rounded-3 py-2 shadow" disabled onclick="sendOrderToServer()">
+                    送出訂單到廚房
+                </button>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label small fw-bold text-secondary">2. 升級套餐：</label><br>
-                <div class="form-check mb-1">
-                    <input class="form-check-input" type="radio" name="combo" id="combo-none" value="0" checked>
-                    <label class="form-check-label" for="combo-none">單點 ($250)</label>
-                </div>
-                <div class="form-check mb-1">
-                    <input class="form-check-input" type="radio" name="combo" id="combo-b" value="80">
-                    <label class="form-check-label" for="combo-b">升級 B 套餐 (+$80)</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="combo" id="combo-a" value="180">
-                    <label class="form-check-label" for="combo-a">升級 A 套餐 (+$180)</label>
-                </div>
-            </div>
-
-            <button class="btn btn-success w-100 mt-2" onclick="addToCart('南瓜焗烤')">加入購物車</button>
-        </div>
-    </div>
-
-    <div class="card menu-card mt-4">
-        <div class="card-body">
-            <h4 class="fw-bold mb-3">我的購物車</h4>
-            <div id="cart-items" class="text-muted small mb-3">購物車是空的</div>
-            <h5 class="fw-bold text-end">總計: $<span id="cart-total">0</span></h5>
-            <button id="submit-btn" class="btn btn-danger w-100 btn-lg mt-3" disabled onclick="sendOrderToServer()">確認送出訂單</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. 自動從網址偵測桌號 (例如網址後面加上 ?table=5)
+    // ==========================================
+    // 1. 完全補齊：全菜單大結構資料庫
+    // ==========================================
+    const menuData = [
+        {
+            category: "🍲 品素好鍋系列 (附飯、甜點一份)",
+            allowCombo: false,
+            items: [
+                { name: "香濃咖哩鍋", price: 380 }, { name: "何首烏御膳鍋", price: 380 },
+                { name: "南瓜鮮味鍋", price: 380 }, { name: "泰式東炎鍋", price: 380 },
+                { name: "猴菇麻油鍋", price: 380 }, { name: "味噌養生鍋", price: 380 },
+                { name: "鮮採番茄鍋", price: 380 }, { name: "茄燒麻辣鍋", price: 380 },
+                { name: "滋補紅麴鍋", price: 380 }, { name: "時蔬健康鍋", price: 380 }
+            ]
+        },
+        {
+            category: "🧀 法式焗烤系列 (可選飯或麵)",
+            allowCombo: true,
+            options: ["焗飯", "焗麵"],
+            items: [
+                { name: "南瓜焗烤", price: 250 }, { name: "鳳梨焗烤", price: 250 },
+                { name: "鮮菇焗烤", price: 250 }, { name: "茄汁焗烤", price: 250 },
+                { name: "咖哩焗烤", price: 250 }, { name: "香椿焗烤", price: 250 },
+                { name: "羅勒焗烤", price: 250 }, { name: "時蔬焗烤", price: 250 }
+            ]
+        },
+        {
+            category: "🍛 義式燉飯系列",
+            allowCombo: true,
+            items: [
+                { name: "薑黃燉飯", price: 250 }, { name: "南瓜燉飯", price: 250 },
+                { name: "香椿燉飯", price: 250 }, { name: "羅勒燉飯", price: 250 },
+                { name: "奶香燉飯", price: 250 }, { name: "咖哩燉飯", price: 250 },
+                { name: "時蔬燉飯", price: 250 }
+            ]
+        },
+        {
+            category: "🍚 品素好飯系列 (炒飯)",
+            allowCombo: true,
+            items: [
+                { name: "咖哩炒飯", price: 200 }, { name: "香椿炒飯", price: 200 },
+                { name: "羅勒炒飯", price: 200 }, { name: "鳳梨炒飯", price: 200 },
+                { name: "東炎炒飯", price: 200 }, { name: "紅麴炒飯", price: 200 },
+                { name: "高麗菜炒飯", price: 200 }
+            ]
+        },
+        {
+            category: "🍝 品素好麵系列",
+            allowCombo: true,
+            items: [
+                { name: "義大利麵", price: 220, customOpts: ["紅醬", "青醬", "白醬"] },
+                { name: "香椿拌麵", price: 220 },
+                { name: "麻香麵線", price: 220 }
+            ]
+        },
+        {
+            category: "🍱 品素快餐系列",
+            allowCombo: true,
+            items: [
+                { name: "內用當日便當(供檸檬水)", price: 120 }
+            ]
+        },
+        {
+            category: "💎 高級松露系列",
+            allowCombo: true,
+            items: [
+                { name: "松露義大利麵", price: 280 },
+                { name: "松露燉飯", price: 280 },
+                { name: "松露炒飯", price: 280 }
+            ]
+        },
+        {
+            category: "🍜 炒泡麵系列",
+            allowCombo: true,
+            items: [
+                { name: "咖哩炒泡麵", price: 150 }, { name: "時蔬炒泡麵", price: 150 },
+                { name: "東炎炒泡麵", price: 150 }, { name: "香椿炒泡麵", price: 150 }
+            ]
+        },
+        {
+            category: "🍜 品素拉麵系列",
+            allowCombo: true,
+            items: [
+                { name: "南瓜拉麵", price: 250 }, { name: "紅燒拉麵", price: 250 },
+                { name: "何首烏拉麵", price: 250 }, { name: "麻油拉麵", price: 250 },
+                { name: "泰式拉麵", price: 250 }, { name: "咖哩拉麵", price: 250 },
+                { name: "味噌拉麵", price: 250 }, { name: "紅麴拉麵", price: 250 },
+                { name: "番茄拉麵", price: 250 }, { name: "時蔬拉麵", price: 250 }
+            ]
+        },
+        {
+            category: "🍟 香酥頌點心系列 (任選兩樣優惠價$180)",
+            allowCombo: false,
+            isFriedFood: true, // 觸發特價計算
+            items: [
+                { name: "香酥炸物-蚵仔酥", price: 100 }, { name: "香酥炸物-薯條", price: 100 },
+                { name: "香酥炸物-吉塊", price: 100 }, { name: "香酥炸物-山藥捲", price: 100 },
+                { name: "香酥炸物-薯餅", price: 100 }
+            ]
+        },
+        {
+            category: "🥢 招牌臭豆腐系列",
+            allowCombo: false,
+            items: [
+                { name: "紅燒臭豆腐火鍋", price: 250 },
+                { name: "紅燒臭豆腐王子麵", price: 150 }
+            ]
+        },
+        {
+            category: "🥣 品素好湯與精選單點",
+            allowCombo: false,
+            items: [
+                { name: "酥皮濃湯", price: 80 }, { name: "玉米濃湯", price: 60 },
+                { name: "時令蔬菜", price: 100 }, { name: "精選沙拉", price: 60 },
+                { name: "精選甜點", price: 60 }, { name: "椒麻花生", price: 60 },
+                { name: "綜合滷味", price: 60 }, { name: "單點紅燒臭豆腐", price: 60 },
+                { name: "香Q豆干", price: 60 }
+            ]
+        },
+        {
+            category: "🍹 特調飲品系列 ($100)",
+            allowCombo: false,
+            items: [
+                { name: "綠茶", price: 100, customOpts: ["冰", "熱"] },
+                { name: "紅茶", price: 100, customOpts: ["冰", "熱"] },
+                { name: "鮮奶", price: 100, customOpts: ["冰", "熱"] },
+                { name: "鮮奶茶", price: 100, customOpts: ["冰", "熱"] },
+                { name: "美式咖啡", price: 100, customOpts: ["冰", "熱"] },
+                { name: "拿鐵", price: 100, customOpts: ["冰", "熱"] },
+                { name: "桂圓紅棗茶", price: 100 }, { name: "養生茶", price: 100 },
+                { name: "養生醋飲", price: 100 }, { name: "現打綜合果汁", price: 100 },
+                { name: "可樂", price: 100 }, { name: "蜂蜜奇亞籽", price: 100 }
+            ]
+        }
+    ];
+
+    // ==========================================
+    // 2. 初始化與動態生成 HTML
+    // ==========================================
     const urlParams = new URLSearchParams(window.location.search);
     const tableNo = urlParams.get('table') || "未偵測到桌號";
     document.getElementById('table-display').innerText = tableNo;
 
-    // 2. 購物車狀態暫存
-    let cart = null;
+    let cart = [];
 
-    function addToCart(itemName) {
-        // 抓取當下的客製化選擇
-        const mainType = document.querySelector('input[name="main-type"]:checked').value;
-        const comboPrice = parseInt(document.querySelector('input[name="combo"]:checked').value);
-        
-        let comboText = "單點";
-        if(comboPrice === 80) comboText = "B套餐";
-        if(comboPrice === 180) comboText = "A套餐";
+    function renderMenu() {
+        const container = document.getElementById('menu-container');
+        let html = '';
 
-        const itemTotal = 250 + comboPrice;
+        menuData.forEach((cat, catIdx) => {
+            html += `<h4 class="category-header" id="cat-${catIdx}">${cat.category}</h4>`;
+            
+            cat.items.forEach((item, itemIdx) => {
+                const uniqueId = `${catIdx}-${itemIdx}`;
+                
+                html += `
+                <div class="card menu-card mb-3 bg-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold m-0 text-dark">${item.name}</h6>
+                                <span class="text-danger small fw-bold">$${item.price}</span>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" id="vegan-${uniqueId}">
+                                <label class="form-check-label small fw-bold text-success" for="vegan-${uniqueId}">改全素</label>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                `;
 
-        // 組合成明細文字
-        cart = {
-            detail: `${itemName}(${mainType}) + [${comboText}]`,
-            price: itemTotal
-        };
+                // 處理大分類通用選項 (如焗烤的 飯/麵)
+                if (cat.options && cat.options.length > 0) {
+                    html += `<div class="col-6"><select class="form-select form-select-sm" id="opt-${uniqueId}">`;
+                    cat.options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                    html += `</select></div>`;
+                }
 
-        // 更新網頁上的購物車畫面
-        document.getElementById('cart-items').innerHTML = `<div class="d-flex justify-content-between"><span>${cart.detail}</span><span class="fw-bold">$${cart.price}</span></div>`;
-        document.getElementById('cart-total').innerText = cart.price;
-        document.getElementById('submit-btn').disabled = false;
-    }
+                // 處理單一品項獨立客製選項 (如義大利麵選醬汁、飲料分冰熱)
+                if (item.customOpts && item.customOpts.length > 0) {
+                    html += `<div class="col-6"><select class="form-select form-select-sm" id="custom-${uniqueId}">`;
+                    item.customOpts.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                    html += `</select></div>`;
+                }
 
-    // 3. 將訂單發送到 Google 試算表
-    function sendOrderToServer() {
-        if (!cart) return;
-        
-        const submitBtn = document.getElementById('submit-btn');
-        submitBtn.disabled = true;
-        submitBtn.innerText = "訂單傳送中...";
+                // 處理主餐升級套餐方案
+                if (cat.allowCombo) {
+                    html += `
+                    <div class="col-12 mt-2 border-top pt-2">
+                        <div class="d-flex flex-wrap" style="gap: 10px;">
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="none-${uniqueId}" value="0" checked onchange="toggleSauce('${uniqueId}', false)">
+                                <label class="form-check-label small" for="none-${uniqueId}">單點</label>
+                            </div>
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboA-${uniqueId}" value="180" onchange="toggleSauce('${uniqueId}', true)">
+                                <label class="form-check-label small" for="comboA-${uniqueId}">+180 A套餐 (沙拉/湯/甜點/飲品)</label>
+                            </div>
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB1-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
+                                <label class="form-check-label small" for="comboB1-${uniqueId}">+80 B餐(沙拉+玉米湯)</label>
+                            </div>
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB2-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
+                                <label class="form-check-label small" for="comboB2-${uniqueId}">+80 B餐(沙拉+甜點)</label>
+                            </div>
+                        </div>
+                        <div class="mt-2 d-none" id="sauce-box-${uniqueId}">
+                            <label class="small fw-bold text-secondary">🥗 套餐沙拉醬：</label>
+                            <div class="form-check form-check-inline ms-2">
+                                <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce1-${uniqueId}" value="千島醬" checked>
+                                <label class="form-check-label small" for="sauce1-${uniqueId}">千島醬</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce2-${uniqueId}" value="和風醬">
+                                <label class="form-check-label small" for="sauce2-${uniqueId}">和風醬</label>
+                            </div>
+                        </div>
+                    </div>`;
+                }
 
-        // 準備要送給 Google Sheets 的資料包
-        const orderData = {
-            order_id: "ORD-" + Date.now().toString().slice(-6), // 隨機生成後六碼單號
-            table_no: tableNo,
-            items_detail: cart.detail,
-            total_price: cart.price
-        };
-
-        // ➔➔➔ 這裡已經自動換成你的網址了 ➔➔➔
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwOp4vY6kAR38iKnaRipBYBtO6iaHGIz3LTnh97MsOU8EuZjOk8k2v8C-sTZNSfgrcZ8g/exec"; 
-
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.status === "success") {
-                alert("🎉 點餐成功！廚房已收到您的訂單。");
-                // 清空購物車
-                cart = null;
-                document.getElementById('cart-items').innerText = "購物車是空的";
-                document.getElementById('cart-total').innerText = "0";
-                submitBtn.innerText = "確認送出訂單";
-            } else {
-                alert("系統錯誤：" + data.message);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "確認送出訂單";
-            }
-        })
-        .catch(error => {
-            alert("網路連線失敗，請稍後再試！");
-            submitBtn.disabled = false;
-            submitBtn.innerText = "確認送出訂單";
+                html += `
+                        </div>
+                        <button class="btn btn-success btn-sm w-100 mt-2 fw-bold rounded-3" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false})">
+                            ＋ 點此加入購物車
+                        </button>
+                    </div>
+                </div>`;
+            });
         });
+        container.innerHTML = html;
     }
-</script>
-</body>
-</html>
+
+    function toggleSauce(id, show) {
+        const box = document.getElementById(`sauce-box-${id}`);
+        if(box) box.className = show ? "mt-2" : "mt-2 d-none";
+    }
+
+    // ==========================================
+    // 3. 購物車及商業打折邏輯
+    // ==========================================
+    function pushToCart(name, price, id, allowCombo, isFriedFood) {
+        let details = [];
+        
+        // 檢查是否客製全素
+        if(document.getElementById(`vegan-${id}`).checked) {
+            details.push("做全素");
+        }
+
+        // 讀取規格下拉選單
+        const optEl = document.getElementById(`opt-${id}`);
+        if(optEl) details.push(optEl.value);
+
+        const customEl = document.getElementById(`custom-${id}`);
+        if(customEl) details.push(customEl.value);
+
+        // 讀取套餐升級
+        let extraPrice = 0;
+        if(allowCombo) {
+            const comboEl = document.querySelector(`input[name="combo-${id}"]:checked`);
+            if(comboEl && comboEl.value !== "0") {
+                extraPrice = parseInt(comboEl.value);
+                let comboName = "";
+                if(comboEl.id.includes("comboA")) comboName = "A套餐";
+                if(comboEl.id.includes("comboB1")) comboName = "B餐(含玉米湯)";
+                if(comboEl.id.includes("comboB2")) comboName = "B餐(含甜點)";
+                
+                const sauce = document.querySelector(`input[name="sauce-${id}"]:checked`).value;
+                details.push(`${comboName}(${sauce})`);
+            }
+        }
+
+        cart.push({
+            cartId: Date.now() + Math.random().toString(36).substring(2, 5),
+            name: name,
+            spec: details.join(', '),
+            price: price + extraPrice,
+            isFriedFood: isFriedFood
+        });
+
+        updateCartUI();
+    }
+
+    function removeCartItem(cartId) {
+        cart = cart.filter(i => i.cartId !== cartId);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const itemsDiv = document.getElementById('cart-items');
+        const totalSpan = document.getElementById('cart-total');
+        const discountDiv = document.getElementById('discount-zone');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if(cart.length === 0) {
+            itemsDiv.innerHTML = "購物車空空如也...";
+            totalSpan.innerText = "0";
+            discountDiv.innerText = "";
+            submitBtn.disabled = true;
+            return;
+        }
+
+        let rawTotal = 0;
+        let friedCount = 0;
+        let html = "";
+
+        cart.forEach(item => {
+            rawTotal += item.price;
+            if(item.
