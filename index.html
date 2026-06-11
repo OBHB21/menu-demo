@@ -150,9 +150,6 @@
 </div>
 
 <script>
-    // ==========================================
-    // 1. 完整菜單結構資料庫
-    // ==========================================
     const menuData = [
         {
             category: "🍲 品素好鍋系列 (附飯、甜點一份)",
@@ -290,7 +287,6 @@
     let orderHistory = []; 
     let currentRound = 1;
 
-    // 🌟 核心防禦升級：全面加上 try-catch 防護罩，杜絕一切快取髒資料引發的死鎖
     function startSystem() {
         try {
             const urlParams = new URLSearchParams(window.location.search);
@@ -302,7 +298,6 @@
             const storedTimestamp = localStorage.getItem('ld_last_timestamp');
             const now = Date.now();
 
-            // 防護：換桌或超時自動清空
             if (storedTable !== tableNo || (storedTimestamp && (now - parseInt(storedTimestamp) > 14400000))) {
                 localStorage.clear();
                 orderHistory = [];
@@ -310,7 +305,6 @@
                 localStorage.setItem('ld_table_no', tableNo);
                 localStorage.setItem('ld_current_view', 'menu');
             } else {
-                // 用 try-catch 保護 JSON 解析，防止任何不合法測試資料摧毀主程式
                 try {
                     orderHistory = JSON.parse(localStorage.getItem('ld_order_history')) || [];
                 } catch(err) {
@@ -319,7 +313,6 @@
                 currentRound = parseInt(localStorage.getItem('ld_current_round')) || 1;
             }
 
-            // 確保無論如何都會強制把選單畫出來！
             renderMenu();
 
             const savedView = localStorage.getItem('ld_current_view') || 'menu';
@@ -333,8 +326,6 @@
                 document.getElementById('receipt-layout').classList.add('d-none');
             }
         } catch (globalError) {
-            // 萬一發生任何不可預期錯誤，終極保底方案：重置快取並強制加載大菜單
-            console.error("系統自動修復中:", globalError);
             localStorage.clear();
             orderHistory = [];
             currentRound = 1;
@@ -400,10 +391,8 @@
 
         menuData.forEach((cat, catIdx) => {
             html += `<h4 class="category-header" id="cat-${catIdx}">${cat.category}</h4>`;
-            
             cat.items.forEach((item, itemIdx) => {
                 const uniqueId = `${catIdx}-${itemIdx}`;
-                
                 html += `
                 <div class="card menu-card mb-3 bg-white">
                     <div class="card-body">
@@ -417,22 +406,18 @@
                                 <label class="form-check-label small fw-bold text-success" for="vegan-${uniqueId}">改全素</label>
                             </div>
                         </div>
-                        
                         <div class="row mt-2">
                 `;
-
                 if (cat.options && cat.options.length > 0) {
                     html += `<div class="col-6"><select class="form-select form-select-sm" id="opt-${uniqueId}">`;
                     cat.options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
                     html += `</select></div>`;
                 }
-
                 if (item.customOpts && item.customOpts.length > 0) {
                     html += `<div class="col-6"><select class="form-select form-select-sm" id="custom-${uniqueId}">`;
                     item.customOpts.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
                     html += `</select></div>`;
                 }
-
                 if (cat.allowCombo) {
                     html += `
                     <div class="col-12 mt-2 border-top pt-2">
@@ -467,7 +452,6 @@
                         </div>
                     </div>`;
                 }
-
                 html += `
                         </div>
                         <div class="d-flex align-items-center mt-2" style="gap: 10px;">
@@ -550,6 +534,15 @@
             if (radio.value === "0") { radio.checked = true; } else { radio.checked = false; }
         });
         document.querySelectorAll('[id^="sauce-box-"]').forEach(box => { box.className = "mt-2 d-none"; });
+    }
+
+    // 我要繼續加點按鈕
+    function backToMenuAndReset() {
+        localStorage.setItem('ld_current_view', 'menu');
+        document.getElementById('receipt-layout').classList.add('d-none');
+        document.getElementById('main-layout').classList.remove('d-none');
+        resetAllMenuInputs();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function updateCartUI() {
@@ -675,6 +668,20 @@
 
                 renderHistoryReceiptUI(tableNo);
 
+                // 🌟【核心修復點】：在切換畫面之前，強制毀屍滅跡所有 Bootstrap 留在 body 的黑色半透明遮罩層
+                try {
+                    var myModalEl = document.getElementById('cartModal');
+                    var modalInstance = bootstrap.Modal.getInstance(myModalEl) || new bootstrap.Modal(myModalEl);
+                    if(modalInstance) modalInstance.hide();
+                } catch(e){}
+                
+                // 暴力拔除所有網頁殘留遮罩，還原網頁身體的正常滾動與點擊權限
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+
+                // 切換面板
                 document.getElementById('main-layout').classList.add('d-none');
                 document.getElementById('mobile-floating-bar').style.display = 'none';
                 document.getElementById('receipt-layout').classList.remove('d-none');
