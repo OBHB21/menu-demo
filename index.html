@@ -229,7 +229,6 @@
 
     let cart = [];
 
-    // 高規格雙重異步狀態檢查
     function startSystem() {
         const urlParams = new URLSearchParams(window.location.search);
         const tableNo = urlParams.get('table') || "未偵測到桌號";
@@ -244,19 +243,16 @@
         startSystem();
     }
 
-    // 數量控制按鈕
     function plusQty(id) {
         const input = document.getElementById(`qty-${id}`);
         if(input) input.value = parseInt(input.value) + 1;
     }
 
-    // 數量控制按鈕
     function minusQty(id) {
         const input = document.getElementById(`qty-${id}`);
         if(input && parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
     }
 
-    // 手機版滑動至購物車
     function scrollToCart() {
         const target = document.getElementById('desktop-cart-target');
         if(target) {
@@ -365,7 +361,6 @@
         if(box) box.className = show ? "mt-2" : "mt-2 d-none";
     }
 
-    // 購物車核心與加入邏輯
     function pushToCart(name, price, id, allowCombo, isFriedFood, event) {
         let details = [];
         
@@ -407,9 +402,9 @@
             isFriedFood: isFriedFood
         });
 
-        // 🌟 已移除會讓畫面閃退回1份的 qtyEl.value = 1 邏輯，數量會穩定停留！
+        // 🌟 修正點：移除自動將數量重置回1的程式碼，數量會穩穩留在當下點的份數
 
-        // 🌟 增加進階按鈕點擊動態回饋
+        // 按鈕加入成功的動態反饋
         const btn = event ? event.target : null;
         if(btn && btn.tagName === 'BUTTON') {
             const originalText = btn.innerText;
@@ -430,6 +425,34 @@
     function removeCartItem(cartId) {
         cart = cart.filter(i => i.cartId !== cartId);
         updateCartUI();
+    }
+
+    // 🌟 新增：點餐成功後，負責將菜單上所有勾選、份數一鍵全面重置的清除函數
+    function resetAllMenuInputs() {
+        // 1. 將所有數量輸入框還原成 1
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.value = 1;
+        });
+        // 2. 將所有改全素開關切回未選取
+        document.querySelectorAll('.form-check-input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+        // 3. 所有規格下拉選單歸位回第一個選項
+        document.querySelectorAll('select.form-select').forEach(select => {
+            select.selectedIndex = 0;
+        });
+        // 4. 所有套餐選項切回單點（value="0" 的項目勾選）
+        document.querySelectorAll('input[name^="combo-"]').forEach(radio => {
+            if (radio.value === "0") {
+                radio.checked = true;
+            } else {
+                radio.checked = false;
+            }
+        });
+        // 5. 將所有套餐的沙拉醬提示外殼隱藏
+        document.querySelectorAll('[id^="sauce-box-"]').forEach(box => {
+            box.className = "mt-2 d-none";
+        });
     }
 
     function updateCartUI() {
@@ -527,6 +550,10 @@
                 alert("🎉 點餐成功！廚房正在為您現點現做。");
                 cart = [];
                 updateCartUI();
+                
+                // 🌟 修正點：訂單送出成功後，立刻啟動大掃除機制，把所有選單控制項全面歸位重置！
+                resetAllMenuInputs();
+                
                 submitBtn.innerText = "送出訂單到廚房";
             } else {
                 alert("發送失敗：" + data.message);
