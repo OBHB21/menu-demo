@@ -229,7 +229,7 @@
 
     let cart = [];
 
-    // 🌟 核心防禦修正：用最高規格的異步狀態檢查，徹底消滅載入時間差 Bug
+    // 高規格雙重異步狀態檢查
     function startSystem() {
         const urlParams = new URLSearchParams(window.location.search);
         const tableNo = urlParams.get('table') || "未偵測到桌號";
@@ -241,7 +241,7 @@
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', startSystem);
     } else {
-        startSystem(); // 萬一 DOM 早就載入好了，直接強行啟動！
+        startSystem();
     }
 
     // 數量控制按鈕
@@ -250,12 +250,13 @@
         if(input) input.value = parseInt(input.value) + 1;
     }
 
+    // 數量控制按鈕
     function minusQty(id) {
         const input = document.getElementById(`qty-${id}`);
         if(input && parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
     }
 
-    // 手機底部一鍵平滑滾動到購物車
+    // 手機版滑動至購物車
     function scrollToCart() {
         const target = document.getElementById('desktop-cart-target');
         if(target) {
@@ -348,7 +349,7 @@
                                 <input type="number" class="form-control text-center fw-bold text-success" id="qty-${uniqueId}" value="1" min="1" readonly>
                                 <button class="btn btn-outline-success" type="button" onclick="plusQty('${uniqueId}')">+</button>
                             </div>
-                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false})">
+                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false}, event)">
                                 加入購物車
                             </button>
                         </div>
@@ -364,7 +365,8 @@
         if(box) box.className = show ? "mt-2" : "mt-2 d-none";
     }
 
-    function pushToCart(name, price, id, allowCombo, isFriedFood) {
+    // 購物車核心與加入邏輯
+    function pushToCart(name, price, id, allowCombo, isFriedFood, event) {
         let details = [];
         
         if(document.getElementById(`vegan-${id}`).checked) {
@@ -394,7 +396,6 @@
 
         const qtyEl = document.getElementById(`qty-${id}`);
         const qty = qtyEl ? parseInt(qtyEl.value) : 1;
-
         const unitPrice = price + extraPrice;
 
         cart.push({
@@ -406,7 +407,22 @@
             isFriedFood: isFriedFood
         });
 
-        if(qtyEl) qtyEl.value = 1;
+        // 🌟 已移除會讓畫面閃退回1份的 qtyEl.value = 1 邏輯，數量會穩定停留！
+
+        // 🌟 增加進階按鈕點擊動態回饋
+        const btn = event ? event.target : null;
+        if(btn && btn.tagName === 'BUTTON') {
+            const originalText = btn.innerText;
+            btn.innerText = `🟢 已加入 ${qty} 份！`;
+            btn.className = "btn btn-outline-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.className = "btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
+                btn.disabled = false;
+            }, 1000);
+        }
 
         updateCartUI();
     }
