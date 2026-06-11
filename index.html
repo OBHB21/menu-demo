@@ -214,22 +214,30 @@
 
     let cart = [];
 
-    // 🌟 核心修正：確保網頁 HTML 元素載入完畢後，才啟動程式
+    // 確保畫面生成完畢才抓元素
     document.addEventListener('DOMContentLoaded', () => {
-        // 初始化桌號
         const urlParams = new URLSearchParams(window.location.search);
         const tableNo = urlParams.get('table') || "未偵測到桌號";
         const tableDisplay = document.getElementById('table-display');
         if (tableDisplay) tableDisplay.innerText = tableNo;
-
-        // 執行菜單渲染
         renderMenu();
     });
+
+    // 🌟 新增：加減數量控制邏輯
+    function plusQty(id) {
+        const input = document.getElementById(`qty-${id}`);
+        if(input) input.value = parseInt(input.value) + 1;
+    }
+
+    function minusQty(id) {
+        const input = document.getElementById(`qty-${id}`);
+        if(input && parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+    }
 
     // 動態渲染菜單畫面
     function renderMenu() {
         const container = document.getElementById('menu-container');
-        if (!container) return; // 安全檢查
+        if (!container) return;
         
         let html = '';
 
@@ -278,15 +286,15 @@
                             </div>
                             <div class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboA-${uniqueId}" value="180" onchange="toggleSauce('${uniqueId}', true)">
-                                <label class="form-check-label small" for="comboA-${uniqueId}">+180 A套餐 (沙拉/湯/甜點/飲品)</label>
+                                <label class="form-check-label small" for="comboA-${uniqueId}">+180 A套餐</label>
                             </div>
                             <div class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB1-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
-                                <label class="form-check-label small" for="comboB1-${uniqueId}">+80 B餐(沙拉+玉米湯)</label>
+                                <label class="form-check-label small" for="comboB1-${uniqueId}">+80 B餐(湯)</label>
                             </div>
                             <div class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB2-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
-                                <label class="form-check-label small" for="comboB2-${uniqueId}">+80 B餐(含甜點)</label>
+                                <label class="form-check-label small" for="comboB2-${uniqueId}">+80 B餐(甜點)</label>
                             </div>
                         </div>
                         <div class="mt-2 d-none" id="sauce-box-${uniqueId}">
@@ -305,9 +313,16 @@
 
                 html += `
                         </div>
-                        <button class="btn btn-success btn-sm w-100 mt-2 fw-bold rounded-3" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false})">
-                            ＋ 點此加入購物車
-                        </button>
+                        <div class="d-flex align-items-center mt-2" style="gap: 10px;">
+                            <div class="input-group input-group-sm" style="width: 110px;">
+                                <button class="btn btn-outline-success" type="button" onclick="minusQty('${uniqueId}')">-</button>
+                                <input type="number" class="form-control text-center fw-bold text-success" id="qty-${uniqueId}" value="1" min="1" readonly>
+                                <button class="btn btn-outline-success" type="button" onclick="plusQty('${uniqueId}')">+</button>
+                            </div>
+                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-1.5" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false})">
+                                加入購物車
+                            </button>
+                        </div>
                     </div>
                 </div>`;
             });
@@ -320,7 +335,7 @@
         if(box) box.className = show ? "mt-2" : "mt-2 d-none";
     }
 
-    // 購物車與商業打折邏輯
+    // 購物車加入與計算
     function pushToCart(name, price, id, allowCombo, isFriedFood) {
         let details = [];
         
@@ -349,13 +364,22 @@
             }
         }
 
+        // 🌟 抓取使用者選擇的份數
+        const qtyEl = document.getElementById(`qty-${id}`);
+        const qty = qtyEl ? parseInt(qtyEl.value) : 1;
+
+        const unitPrice = price + extraPrice;
+
         cart.push({
             cartId: Date.now() + Math.random().toString(36).substring(2, 5),
             name: name,
             spec: details.join(', '),
-            price: price + extraPrice,
+            qty: qty,                 // 儲存份數
+            price: unitPrice * qty,    // 總價 = 單價 * 份數
             isFriedFood: isFriedFood
         });
+
+        if(qtyEl) qtyEl.value = 1; // 加入購物車後，將該品項的輸入框歸位重置為 1 份
 
         updateCartUI();
     }
@@ -385,13 +409,13 @@
 
         cart.forEach(item => {
             rawTotal += item.price;
-            if(item.isFriedFood) friedCount++;
+            if(item.isFriedFood) friedCount += item.qty; // 🌟 加總份數
             
             let specText = item.spec ? `<br><small class="text-secondary">└ ${item.spec}</small>` : "";
             html += `
             <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom text-dark">
                 <div>
-                    <span class="fw-bold">${item.name}</span>${specText}
+                    <span class="fw-bold">${item.name}</span> <span class="badge bg-secondary">x${item.qty}</span>${specText}
                     <div class="text-danger fw-bold">$${item.price}</div>
                 </div>
                 <button class="btn btn-sm btn-link text-danger text-decoration-none" onclick="removeCartItem('${item.cartId}')">刪除</button>
@@ -420,9 +444,10 @@
         submitBtn.disabled = true;
         submitBtn.innerText = "正在同步至廚房...";
 
+        // 🌟 自動根據份數格式化廚房看得懂的明細
         const detailString = cart.map(item => {
             let specStr = item.spec ? ` (${item.spec})` : '';
-            return `• 1x ${item.name}${specStr} $${item.price}`;
+            return `• ${item.qty}x ${item.name}${specStr} $${item.price}`;
         }).join('\n');
 
         const urlParams = new URLSearchParams(window.location.search);
