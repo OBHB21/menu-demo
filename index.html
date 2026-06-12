@@ -4,33 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>蓮德品素天地 - 智慧點餐系統</title>
+    <!-- 引入 Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f3f7f4; font-family: "Microsoft JhengHei", sans-serif; padding-bottom: 100px; }
         .sticky-top-nav { position: sticky; top: 0; z-index: 1020; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .nav-pills .nav-link.active { background-color: #198754; }
         .nav-pills .nav-link { color: #198754; font-weight: bold; white-space: nowrap; }
+        
+        /* 網格卡片佈局優化 */
         .menu-card { border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); overflow: hidden; display: flex; flex-direction: column; height: 100%; }
         .menu-card .card-body { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        
         .category-header { border-left: 6px solid #198754; padding-left: 12px; margin-top: 40px; margin-bottom: 20px; font-weight: bold; color: #1a4d34; }
         .notice-box { background-color: #fff3cd; border-radius: 12px; font-size: 0.85rem; border: 1px solid #ffe69c; }
         .cart-sticky { position: sticky; top: 90px; }
-        /* 🌟 精美餐點照片專屬封面 CSS */
-        .card-img-top { width: 100%; height: 140px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; background-color: #eaefe2; }
+        
         /* 收據專屬樣式 */
         .receipt-card { background: white; border: none; border-radius: 24px; box-shadow: 0 15px 35px rgba(25,135,84,0.08); }
         .receipt-dot-line { border-top: 2px dashed #ccc; height: 1px; margin: 15px 0; }
+
+        /* 🌟 點心小菜特調飲品的美食相片牆專用樣式 */
+        .card-img-top { width: 100%; height: 130px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; background-color: #eaefe2; }
+
+        /* 🌟 獨家研發：超有質感的跨頁面絲滑淡入淡出動畫系統 */
+        .view-animate {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .view-animate-out {
+            opacity: 0 !important;
+            transform: scale(0.96) !important;
+        }
     </style>
 </head>
 <body>
 
-<div id="main-layout">
+<!-- 主介面外殼：點餐時顯示 -->
+<div id="main-layout" class="view-animate">
+    <!-- 頂部導覽列與分類導航 -->
     <div class="sticky-top-nav bg-white p-2 mb-3">
         <div class="container text-center mb-2">
             <h2 class="fw-bold text-success m-0" style="letter-spacing: 2px;">蓮德品素天地</h2>
             <small class="text-muted">中正區寧波西街82號 | 02-23926208</small>
             <div class="mt-1"><span class="badge bg-success fs-6">桌號：<span id="table-display">偵測中...</span></span></div>
         </div>
+        <!-- 分類快速傳送門 -->
         <div class="d-flex overflow-x-auto py-2 px-1 container text-center" style="gap: 5px; -webkit-overflow-scrolling: touch;">
             <a href="#cat-0" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好鍋</a>
             <a href="#cat-1" class="btn btn-sm btn-outline-success rounded-pill fw-bold">法式焗烤</a>
@@ -49,6 +69,7 @@
     </div>
 
     <div class="container">
+        <!-- 消費須知 -->
         <div class="notice-box p-3 mb-4 shadow-sm text-dark">
             <h6 class="fw-bold m-0 mb-1">⚠️ 店家重要公告與消費須知</h6>
             <ul class="m-0 p-0 ps-3">
@@ -60,8 +81,10 @@
         </div>
 
         <div class="row">
+            <!-- 左側：全品項選單 -->
             <div class="col-lg-7" id="menu-container"></div>
 
+            <!-- 右側：桌機版固定側邊購物車 -->
             <div class="col-lg-5 d-none d-lg-block" id="desktop-cart-target">
                 <div class="card menu-card cart-sticky p-3 bg-white">
                     <h4 class="fw-bold text-dark border-bottom pb-2 mb-3">🛒 我的購物車</h4>
@@ -83,7 +106,8 @@
     </div>
 </div>
 
-<div class="container py-5 d-none" id="receipt-layout" style="max-width: 550px;">
+<!-- 智慧數位收據明細介面 -->
+<div class="container py-5 d-none view-animate" id="receipt-layout" style="max-width: 550px;">
     <div class="card receipt-card p-4 text-center">
         <div class="text-warning mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-clock-history d-inline-block text-warning" viewBox="0 0 16 16">
@@ -115,6 +139,7 @@
     </div>
 </div>
 
+<!-- 手機版底部智慧浮動總計欄 -->
 <div id="mobile-floating-bar" class="fixed-bottom bg-white shadow-lg border-top p-3 d-lg-none" style="z-index: 1030; display: none;">
     <div class="d-flex justify-content-between align-items-center container-fluid p-0">
         <div>
@@ -127,6 +152,7 @@
     </div>
 </div>
 
+<!-- 手機購物車彈窗 (Modal) -->
 <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
         <div class="modal-content text-dark rounded-4 border-0 shadow-lg">
@@ -153,14 +179,14 @@
 </div>
 
 <script>
-    // ==========================================
-    // 菜單結構資料庫 (🌟已加入 isGrid 控制並排與 img 欄位)
-    // ==========================================
+    // =========================================================
+    // 菜單結構資料庫 (🌟已全面整合 isGrid 雙欄網格控制器與 img 預留欄位)
+    // =========================================================
     const menuData = [
         {
             category: "🍲 品素好鍋系列 (附飯、甜點一份)",
             allowCombo: false,
-            isGrid: false, // 主餐維持大單欄
+            isGrid: false, // 主餐：大圖單直欄，方便讀取套餐
             items: [
                 { name: "香濃咖哩鍋", price: 380, img: "" }, { name: "何首烏御膳鍋", price: 380, img: "" },
                 { name: "南瓜鮮味鍋", price: 380, img: "" }, { name: "泰式東炎鍋", price: 380, img: "" },
@@ -255,7 +281,7 @@
         {
             category: "🍟 香酥頌點心系列 (任選兩樣優惠價$180)",
             allowCombo: false,
-            isGrid: true, // 🌟炸物啟動雙欄並排
+            isGrid: true, // 🌟 啟動高質感左右雙欄並排
             isFriedFood: true,
             items: [
                 { name: "香酥炸物-蚵仔酥", price: 100, img: "" }, { name: "香酥炸物-薯條", price: 100, img: "" },
@@ -275,7 +301,7 @@
         {
             category: "🥣 品素好湯與精選單點",
             allowCombo: false,
-            isGrid: true, // 🌟湯品小菜啟動雙欄並排
+            isGrid: true, // 🌟 啟動高質感左右雙欄並排
             items: [
                 { name: "酥皮濃湯", price: 80, img: "" }, { name: "玉米濃湯", price: 60, img: "" },
                 { name: "時令蔬菜", price: 100, img: "" }, { name: "精選沙拉", price: 60, img: "" },
@@ -287,7 +313,7 @@
         {
             category: "🍹 特調飲品系列 ($100)",
             allowCombo: false,
-            isGrid: true, // 🌟飲品啟動雙欄並排
+            isGrid: true, // 🌟 啟動高質感左右雙欄並排
             items: [
                 { name: "綠茶", price: 100, customOpts: ["冰", "熱"], img: "" },
                 { name: "紅茶", price: 100, customOpts: ["冰", "熱"], img: "" },
@@ -399,7 +425,7 @@
         if(input && parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
     }
 
-    // 🌟 動態渲染菜單畫面 (已整合 isGrid 雙欄並排與照片封面邏輯)
+    // 動態與網格混合式渲染選單
     function renderMenu() {
         const container = document.getElementById('menu-container');
         if (!container) return;
@@ -408,18 +434,19 @@
         menuData.forEach((cat, catIdx) => {
             html += `<h4 class="category-header" id="cat-${catIdx}">${cat.category}</h4>`;
             
-            // 每一區分類自動包覆一個網格 row 容器
+            // 🌟 網格列注入：提供 Bootstrap Grid 的行外殼
             html += `<div class="row g-2">`;
 
             cat.items.forEach((item, itemIdx) => {
                 const uniqueId = `${catIdx}-${itemIdx}`;
                 
-                // 根據 isGrid 設定，決定是 col-12 (單欄滿版) 還是 col-6 (雙欄並排)
+                // 🌟 動態欄寬分配：並排分類套用 col-6，主餐套用 col-12
                 const colClass = cat.isGrid ? "col-6 mb-2" : "col-12 mb-3";
                 
                 html += `
                 <div class="${colClass}">
                     <div class="card menu-card bg-white">
+                        <!-- 🌟 智慧相片封面防護罩：若 img 有網址會自動在卡片最上方拉出精美封面 -->
                         ${item.img ? `<img src="${item.img}" class="card-img-top" alt="${item.name}">` : ''}
                         
                         <div class="card-body p-3">
@@ -510,7 +537,7 @@
                 </div>`;
             });
 
-            html += `</div>`; // 結束 row 網格
+            html += `</div>`; // 結束 row
         });
         container.innerHTML = html;
     }
@@ -558,7 +585,7 @@
         const btn = event ? event.target : null;
         if(btn && btn.tagName === 'BUTTON') {
             const originalText = btn.innerText;
-            btn.innerText = `已加入 ${qty} 份！`;
+            btn.innerText = `🟢 已加入 ${qty} 份！`;
             btn.className = "btn btn-outline-success btn-sm flex-grow-1 fw-bold rounded-3 py-2";
             btn.disabled = true;
             setTimeout(() => {
@@ -585,13 +612,32 @@
         document.querySelectorAll('[id^="sauce-box-"]').forEach(box => { box.className = "mt-2 d-none"; });
     }
 
-    // 我要繼續加點按鈕
+    // 🌟【重要升級】：收據點選加點，觸發絲滑淡入淡出動畫
     function backToMenuAndReset() {
         localStorage.setItem('ld_current_view', 'menu');
-        document.getElementById('receipt-layout').classList.add('d-none');
-        document.getElementById('main-layout').classList.remove('d-none');
         resetAllMenuInputs();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        const receipt = document.getElementById('receipt-layout');
+        const main = document.getElementById('main-layout');
+        
+        // 1. 為收據掛上「淡出＋微縮」樣式
+        receipt.classList.add('view-animate-out');
+        
+        // 2. 等待 300ms 物理動畫執行完畢後切換佈局
+        setTimeout(() => {
+            receipt.classList.add('d-none');
+            receipt.classList.remove('view-animate-out');
+            
+            // 3. 移除主介面的隱藏，並使其保持在「隱形縮小」狀態準備進場
+            main.classList.remove('d-none');
+            main.classList.add('view-animate-out');
+            
+            // 4. 延遲一下下引發重繪，解鎖淡入動畫
+            setTimeout(() => {
+                main.classList.remove('view-animate-out');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 30);
+        }, 300);
     }
 
     function updateCartUI() {
@@ -682,7 +728,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const tableNo = urlParams.get('table') || "未偵測到桌號";
         
-        // 單號智慧鎖定邏輯
         let finalOrderId = localStorage.getItem('ld_last_order_id');
         if (!finalOrderId) {
             finalOrderId = "ORD-" + Date.now().toString().slice(-6);
@@ -722,7 +767,7 @@
 
                 renderHistoryReceiptUI(tableNo);
 
-                // ======= 🌟 異步非阻塞暴力清除遮罩層機制 =======
+                // 異步非阻塞暴力清除遮罩層
                 try {
                     var myModalEl = document.getElementById('cartModal');
                     if (myModalEl) {
@@ -733,20 +778,30 @@
                     }
                 } catch(e){ console.log(e); }
                 
-                // 強行移除所有阻擋點擊的殘留暗黑背景，秒級釋放網頁控制權
+                // 🌟【送出成功時】：同樣套用絲滑淡出大菜單，淡入收據頁面
+                const main = document.getElementById('main-layout');
+                const receipt = document.getElementById('receipt-layout');
+                
+                main.classList.add('view-animate-out');
+                document.getElementById('mobile-floating-bar').style.display = 'none';
+                
                 setTimeout(() => {
                     document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = '';
                     document.body.style.paddingRight = '';
                     
-                    // 完全移除阻擋後才切換介面
-                    document.getElementById('main-layout').classList.add('d-none');
-                    document.getElementById('mobile-floating-bar').style.display = 'none';
-                    document.getElementById('receipt-layout').classList.remove('d-none');
-                    window.scrollTo(0, 0);
-                }, 150);
-                // ============================================
+                    main.作法 = main.classList.add('d-none');
+                    main.classList.remove('view-animate-out');
+                    
+                    receipt.classList.remove('d-none');
+                    receipt.classList.add('view-animate-out');
+                    
+                    setTimeout(() => {
+                        receipt.classList.remove('view-animate-out');
+                        window.scrollTo(0, 0);
+                    }, 30);
+                }, 300);
 
                 currentRound++;
                 cart = [];
@@ -768,6 +823,7 @@
     }
 </script>
 
+<!-- 引入 Bootstrap 5.3 核心腳本包 -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
