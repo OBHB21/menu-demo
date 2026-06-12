@@ -4,18 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>蓮德品素天地 - 智慧點餐系統</title>
+    <!-- 引入 Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f3f7f4; font-family: "Microsoft JhengHei", sans-serif; padding-bottom: 100px; }
         .sticky-top-nav { position: sticky; top: 0; z-index: 1020; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .nav-pills .nav-link.active { background-color: #198754; }
-        .nav-pills .nav-link { color: #198754; font-weight: bold; white-space: nowrap; }
         
         /* 網格卡片佈局優化 */
         .menu-card { border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); overflow: hidden; display: flex; flex-direction: column; height: 100%; }
         .menu-card .card-body { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .category-header { border-left: 6px solid #198754; padding-left: 12px; margin-top: 40px; margin-bottom: 20px; font-weight: bold; color: #1a4d34; }
+        /* 🌟 分類目錄字卡專屬設計 */
+        .cat-select-card { border: none; border-radius: 20px; box-shadow: 0 6px 15px rgba(25,135,84,0.05); transition: all 0.25s ease; background: white; cursor: pointer; text-align: center; padding: 25px 15px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .cat-select-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(25,135,84,0.1); background-color: #fafffb; }
+        .cat-icon { font-size: 2.2rem; margin-bottom: 8px; }
+        .cat-title { font-weight: bold; color: #1a4d34; font-size: 1.05rem; line-height: 1.4; }
+        
+        .category-header { border-left: 6px solid #198754; padding-left: 12px; margin-top: 15px; margin-bottom: 20px; font-weight: bold; color: #1a4d34; }
         .notice-box { background-color: #fff3cd; border-radius: 12px; font-size: 0.85rem; border: 1px solid #ffe69c; }
         .cart-sticky { position: sticky; top: 90px; }
         
@@ -23,61 +28,64 @@
         .receipt-card { background: white; border: none; border-radius: 24px; box-shadow: 0 15px 35px rgba(25,135,84,0.08); }
         .receipt-dot-line { border-top: 2px dashed #ccc; height: 1px; margin: 15px 0; }
 
-        /* 點心小菜特調飲品的美食相片牆專用樣式 */
+        /* 美食相片牆樣式 */
         .card-img-top { width: 100%; height: 130px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; background-color: #eaefe2; }
 
         /* 跨頁面絲滑淡入淡出動畫系統 */
         .view-animate {
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transition: opacity 0.22s ease-in-out, transform 0.22s ease-in-out;
             opacity: 1;
             transform: scale(1);
         }
         .view-animate-out {
             opacity: 0 !important;
-            transform: scale(0.96) !important;
+            transform: scale(0.97) !important;
         }
     </style>
 </head>
 <body>
 
+<!-- 主介面外殼：點餐時顯示 -->
 <div id="main-layout" class="view-animate">
+    <!-- 頂部導覽列 -->
     <div class="sticky-top-nav bg-white p-2 mb-3">
-        <div class="container text-center mb-2">
+        <div class="container text-center mb-1">
             <h2 class="fw-bold text-success m-0" style="letter-spacing: 2px;">蓮德品素天地</h2>
             <small class="text-muted">中正區寧波西街82號 | 02-23926208</small>
             <div class="mt-1"><span class="badge bg-success fs-6">桌號：<span id="table-display">偵測中...</span></span></div>
         </div>
-        <div class="d-flex overflow-x-auto py-2 px-1 container text-center" style="gap: 5px; -webkit-overflow-scrolling: touch;">
-            <a href="#cat-0" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好鍋</a>
-            <a href="#cat-1" class="btn btn-sm btn-outline-success rounded-pill fw-bold">法式焗烤</a>
-            <a href="#cat-2" class="btn btn-sm btn-outline-success rounded-pill fw-bold">義式燉飯</a>
-            <a href="#cat-3" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好飯</a>
-            <a href="#cat-4" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素好麵</a>
-            <a href="#cat-5" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素快餐</a>
-            <a href="#cat-6" class="btn btn-sm btn-outline-success rounded-pill fw-bold">松露系列</a>
-            <a href="#cat-7" class="btn btn-sm btn-outline-success rounded-pill fw-bold">炒泡麵</a>
-            <a href="#cat-8" class="btn btn-sm btn-outline-success rounded-pill fw-bold">品素拉麵</a>
-            <a href="#cat-9" class="btn btn-sm btn-outline-success rounded-pill fw-bold">香酥炸物</a>
-            <a href="#cat-10" class="btn btn-sm btn-outline-success rounded-pill fw-bold">臭豆腐</a>
-            <a href="#cat-11" class="btn btn-sm btn-outline-success rounded-pill fw-bold">湯品單點</a>
-            <a href="#cat-12" class="btn btn-sm btn-outline-success rounded-pill fw-bold">精選飲品</a>
-        </div>
     </div>
 
     <div class="container">
+        <!-- 消費須知 -->
         <div class="notice-box p-3 mb-4 shadow-sm text-dark">
             <h6 class="fw-bold m-0 mb-1">⚠️ 店家重要公告與消費須知</h6>
             <ul class="m-0 p-0 ps-3">
                 <li>每人最低消費 <strong>$120元</strong> / 請勿攜帶外食。</li>
                 <li>餐點皆為現點現做，請耐心等候。</li>
-                <li><strong>過敏提示：</strong>羅勒(青醬)餐點含有堅果成分，過敏者請勿食用。</li>
                 <li>店內餐點多為奶素，皆可客製化做成<strong>全素</strong>。</li>
             </ul>
         </div>
 
         <div class="row">
-            <div class="col-lg-7" id="menu-container"></div>
+            <!-- 左側：二階段智慧切換區域 -->
+            <div class="col-lg-7">
+                <!-- 第一階段：分類目錄大廳 -->
+                <div id="category-hub-view" class="view-animate">
+                    <h4 class="fw-bold mb-3 text-secondary" style="font-size: 1.1rem; padding-left: 5px;">📖 請先選擇餐點類別：</h4>
+                    <div class="row g-3" id="category-hub-container"></div>
+                </div>
+                
+                <!-- 第二階段：分類項目詳細內頁 (預設隱藏) -->
+                <div id="category-items-view" class="view-animate d-none">
+                    <button class="btn btn-outline-success fw-bold rounded-pill mb-3 px-4 py-2 shadow-sm" onclick="backToCategoryHub()">
+                        ⬅ 返回分類大廳
+                    </button>
+                    <div id="category-items-container"></div>
+                </div>
+            </div>
 
+            <!-- 右側：桌機版固定側邊購物車 -->
             <div class="col-lg-5 d-none d-lg-block" id="desktop-cart-target">
                 <div class="card menu-card cart-sticky p-3 bg-white">
                     <h4 class="fw-bold text-dark border-bottom pb-2 mb-3">🛒 我的購物車</h4>
@@ -99,6 +107,7 @@
     </div>
 </div>
 
+<!-- 智慧數位收據明細介面 -->
 <div class="container py-5 d-none view-animate" id="receipt-layout" style="max-width: 550px;">
     <div class="card receipt-card p-4 text-center">
         <div class="text-warning mb-3">
@@ -131,6 +140,7 @@
     </div>
 </div>
 
+<!-- 手機版底部智慧浮動總計欄 -->
 <div id="mobile-floating-bar" class="fixed-bottom bg-white shadow-lg border-top p-3 d-lg-none" style="z-index: 1030; display: none;">
     <div class="d-flex justify-content-between align-items-center container-fluid p-0">
         <div>
@@ -143,6 +153,7 @@
     </div>
 </div>
 
+<!-- 手機購物車彈窗 (Modal) -->
 <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
         <div class="modal-content text-dark rounded-4 border-0 shadow-lg">
@@ -170,13 +181,12 @@
 
 <script>
     // ==========================================
-    // 菜單結構資料庫
+    // 菜單結構資料庫 (一字不漏完全版)
     // ==========================================
     const menuData = [
         {
-            category: "🍲 品素好鍋系列 (附飯、甜點一份)",
-            allowCombo: false,
-            isGrid: false, 
+            category: "品素好鍋系列", emoji: "🍲",
+            allowCombo: false, isGrid: false, 
             items: [
                 { name: "香濃咖哩鍋", price: 380, img: "" }, { name: "何首烏御膳鍋", price: 380, img: "" },
                 { name: "南瓜鮮味鍋", price: 380, img: "" }, { name: "泰式東炎鍋", price: 380, img: "" },
@@ -186,9 +196,8 @@
             ]
         },
         {
-            category: "🧀 法式焗烤系列 (可選飯或麵)",
-            allowCombo: true,
-            isGrid: false,
+            category: "法式焗烤系列", emoji: "🧀",
+            allowCombo: true, isGrid: false,
             options: ["焗飯", "焗麵"],
             items: [
                 { name: "南瓜焗烤", price: 250, img: "" }, { name: "鳳梨焗烤", price: 250, img: "" },
@@ -198,9 +207,8 @@
             ]
         },
         {
-            category: "🍛 義式燉飯系列",
-            allowCombo: true,
-            isGrid: false,
+            category: "義式燉飯系列", emoji: "🍛",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "薑黃燉飯", price: 250, img: "" }, { name: "南瓜燉飯", price: 250, img: "" },
                 { name: "香椿燉飯", price: 250, img: "" }, { name: "羅勒燉飯", price: 250, img: "" },
@@ -209,9 +217,8 @@
             ]
         },
         {
-            category: "🍚 品素好飯系列 (炒飯)",
-            allowCombo: true,
-            isGrid: false,
+            category: "品素好飯系列", emoji: "🍚",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "咖哩炒飯", price: 200, img: "" }, { name: "香椿炒飯", price: 200, img: "" },
                 { name: "羅勒炒飯", price: 200, img: "" }, { name: "鳳梨炒飯", price: 200, img: "" },
@@ -220,9 +227,8 @@
             ]
         },
         {
-            category: "🍝 品素好麵系列",
-            allowCombo: true,
-            isGrid: false,
+            category: "品素好麵系列", emoji: "🍝",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "義大利麵", price: 220, customOpts: ["紅醬", "青醬", "白醬"], img: "" },
                 { name: "香椿拌麵", price: 220, img: "" },
@@ -230,17 +236,15 @@
             ]
         },
         {
-            category: "🍱 品素快餐系列",
-            allowCombo: true,
-            isGrid: false,
+            category: "品素快餐系列", emoji: "🍱",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "內用當日便當(供檸檬水)", price: 120, img: "" }
             ]
         },
         {
-            category: "💎 高級松露系列",
-            allowCombo: true,
-            isGrid: false,
+            category: "高級松露系列", emoji: "💎",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "松露義大利麵", price: 280, img: "" },
                 { name: "松露燉飯", price: 280, img: "" },
@@ -248,18 +252,16 @@
             ]
         },
         {
-            category: "🍜 炒泡麵系列",
-            allowCombo: true,
-            isGrid: false,
+            category: "炒泡麵系列", emoji: "🍜",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "咖哩炒泡麵", price: 150, img: "" }, { name: "時蔬炒泡麵", price: 150, img: "" },
                 { name: "東炎炒泡麵", price: 150, img: "" }, { name: "香椿炒泡麵", price: 150, img: "" }
             ]
         },
         {
-            category: "🍜 品素拉麵系列",
-            allowCombo: true,
-            isGrid: false,
+            category: "品素拉麵系列", emoji: "🍜",
+            allowCombo: true, isGrid: false,
             items: [
                 { name: "南瓜拉麵", price: 250, img: "" }, { name: "紅燒拉麵", price: 250, img: "" },
                 { name: "何首烏拉麵", price: 250, img: "" }, { name: "麻油拉麵", price: 250, img: "" },
@@ -269,9 +271,8 @@
             ]
         },
         {
-            category: "🍟 香酥頌點心系列 (任選兩樣優惠價$180)",
-            allowCombo: false,
-            isGrid: true, 
+            category: "香酥炸物點心", emoji: "🍟",
+            allowCombo: false, isGrid: true, 
             isFriedFood: true,
             items: [
                 { name: "香酥炸物-蚵仔酥", price: 100, img: "" }, { name: "香酥炸物-薯條", price: 100, img: "" },
@@ -280,18 +281,16 @@
             ]
         },
         {
-            category: "🥢 招牌臭豆腐系列",
-            allowCombo: false,
-            isGrid: false,
+            category: "招牌臭豆腐系列", emoji: "🥢",
+            allowCombo: false, isGrid: false,
             items: [
                 { name: "紅燒臭豆腐火鍋", price: 250, img: "" },
                 { name: "紅燒臭豆腐王子麵", price: 150, img: "" }
             ]
         },
         {
-            category: "🥣 品素好湯與精選單點",
-            allowCombo: false,
-            isGrid: true, 
+            category: "湯品單點與小菜", emoji: "🥣",
+            allowCombo: false, isGrid: true, 
             items: [
                 { name: "酥皮濃湯", price: 80, img: "" }, { name: "玉米濃湯", price: 60, img: "" },
                 { name: "時令蔬菜", price: 100, img: "" }, { name: "精選沙拉", price: 60, img: "" },
@@ -301,9 +300,8 @@
             ]
         },
         {
-            category: "🍹 特調飲品系列 ($100)",
-            allowCombo: false,
-            isGrid: true, 
+            category: "精選特調飲品", emoji: "🍹",
+            allowCombo: false, isGrid: true, 
             items: [
                 { name: "綠茶", price: 100, customOpts: ["冰", "熱"], img: "" },
                 { name: "紅茶", price: 100, customOpts: ["冰", "熱"], img: "" },
@@ -322,6 +320,7 @@
     let orderHistory = []; 
     let currentRound = 1;
 
+    // 安全防禦初始化與還原機制
     function startSystem() {
         try {
             const urlParams = new URLSearchParams(window.location.search);
@@ -348,7 +347,8 @@
                 currentRound = parseInt(localStorage.getItem('ld_current_round')) || 1;
             }
 
-            renderMenu();
+            // 渲染第一階段：分類大廳
+            renderCategoryHub();
 
             const savedView = localStorage.getItem('ld_current_view') || 'menu';
             if (savedView === 'receipt' && orderHistory.length > 0) {
@@ -364,7 +364,7 @@
             localStorage.clear();
             orderHistory = [];
             currentRound = 1;
-            renderMenu();
+            renderCategoryHub();
             document.getElementById('main-layout').classList.remove('d-none');
             document.getElementById('receipt-layout').classList.add('d-none');
         }
@@ -414,114 +414,173 @@
         if(input && parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
     }
 
-    function renderMenu() {
-        const container = document.getElementById('menu-container');
-        if (!container) return;
+    // 🌟【第一階段】：渲染主頁的 13 個大分類圖卡大廳
+    function renderCategoryHub() {
+        const hubContainer = document.getElementById('category-hub-container');
+        if (!hubContainer) return;
         let html = '';
-
         menuData.forEach((cat, catIdx) => {
-            html += `<h4 class="category-header" id="cat-${catIdx}">${cat.category}</h4>`;
-            html += `<div class="row g-2">`;
+            html += `
+            <div class="col-6 col-sm-4">
+                <div class="cat-select-card shadow-sm" onclick="switchToCategoryItems(${catIdx})">
+                    <div class="cat-icon">${cat.emoji}</div>
+                    <div class="cat-title">${cat.category}</div>
+                </div>
+            </div>`;
+        });
+        hubContainer.innerHTML = html;
+    }
 
-            cat.items.forEach((item, itemIdx) => {
-                const uniqueId = `${catIdx}-${itemIdx}`;
-                const colClass = cat.isGrid ? "col-6 mb-2" : "col-12 mb-3";
-                
-                html += `
-                <div class="${colClass}">
-                    <div class="card menu-card bg-white">
-                        ${item.img ? `<img src="${item.img}" class="card-img-top" alt="${item.name}">` : ''}
+    // 🌟【切換動畫】：點擊分類字卡，絲滑轉場到餐點項目列表
+    function switchToCategoryItems(catIdx) {
+        const hubView = document.getElementById('category-hub-view');
+        const itemsView = document.getElementById('category-items-view');
+        
+        hubView.classList.add('view-animate-out');
+        
+        setTimeout(() => {
+            hubView.classList.add('d-none');
+            hubView.classList.remove('view-animate-out');
+            
+            // 渲染該分類對應的餐點項目
+            renderSpecificCategoryItems(catIdx);
+            
+            itemsView.classList.remove('d-none');
+            itemsView.classList.add('view-animate-out');
+            setTimeout(() => {
+                itemsView.classList.remove('view-animate-out');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 30);
+        }, 220);
+    }
+
+    // 🌟【返回動畫】：點擊返回，從餐點頁退回分類大廳
+    function backToCategoryHub() {
+        const hubView = document.getElementById('category-hub-view');
+        const itemsView = document.getElementById('category-items-view');
+        
+        itemsView.classList.add('view-animate-out');
+        
+        setTimeout(() => {
+            itemsView.classList.add('d-none');
+            itemsView.classList.remove('view-animate-out');
+            
+            hubView.classList.remove('d-none');
+            hubView.classList.add('view-animate-out');
+            setTimeout(() => {
+                hubView.classList.remove('view-animate-out');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 30);
+        }, 220);
+    }
+
+    // 🌟【第二階段】：動態渲染單一分類內部的詳細餐點項目
+    function renderSpecificCategoryItems(catIdx) {
+        const container = document.getElementById('category-items-container');
+        if (!container) return;
+        
+        const cat = menuData[catIdx];
+        let html = `<h4 class="category-header">${cat.emoji} ${cat.category}</h4>`;
+        html += `<div class="row g-2">`;
+
+        cat.items.forEach((item, itemIdx) => {
+            const uniqueId = `${catIdx}-${itemIdx}`;
+            const colClass = cat.isGrid ? "col-6 mb-2" : "col-12 mb-3";
+            
+            html += `
+            <div class="${colClass}">
+                <div class="card menu-card bg-white">
+                    ${item.img ? `<img src="${item.img}" class="card-img-top" alt="${item.name}">` : ''}
+                    
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                            <div>
+                                <h6 class="fw-bold m-0 text-dark" style="font-size: ${cat.isGrid ? '0.95rem' : '1.1rem'};">${item.name}</h6>
+                                <span class="text-danger small fw-bold" style="font-size: ${cat.isGrid ? '0.9rem' : '1.05rem'};">$${item.price}</span>
+                            </div>
+                            <div class="form-check form-switch m-0 mt-1 mt-sm-0">
+                                <input class="form-check-input" type="checkbox" id="vegan-${uniqueId}" style="transform: scale(${cat.isGrid ? '0.8' : '1'});">
+                                <label class="form-check-label small fw-bold text-success" for="vegan-${uniqueId}" style="font-size: 0.8rem;">全素</label>
+                            </div>
+                        </div>
                         
-                        <div class="card-body p-3">
-                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
-                                <div>
-                                    <h6 class="fw-bold m-0 text-dark" style="font-size: ${cat.isGrid ? '0.95rem' : '1.1rem'};">${item.name}</h6>
-                                    <span class="text-danger small fw-bold" style="font-size: ${cat.isGrid ? '0.9rem' : '1.05rem'};">$${item.price}</span>
-                                </div>
-                                <div class="form-check form-switch m-0 mt-1 mt-sm-0">
-                                    <input class="form-check-input" type="checkbox" id="vegan-${uniqueId}" style="transform: scale(${cat.isGrid ? '0.8' : '1'});">
-                                    <label class="form-check-label small fw-bold text-success" for="vegan-${uniqueId}" style="font-size: 0.8rem;">全素</label>
-                                </div>
-                            </div>
-                            
-                            <div class="row mt-2 g-1">
-                `;
+                        <div class="row mt-2 g-1">
+            `;
 
-                if (cat.options && cat.options.length > 0) {
-                    html += `<div class="col-12"><select class="form-select form-select-sm" id="opt-${uniqueId}">`;
-                    cat.options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
-                    html += `</select></div>`;
-                }
+            if (cat.options && cat.options.length > 0) {
+                html += `<div class="col-12"><select class="form-select form-select-sm" id="opt-${uniqueId}">`;
+                cat.options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                html += `</select></div>`;
+            }
 
-                if (item.customOpts && item.customOpts.length > 0) {
-                    html += `<div class="col-12"><select class="form-select form-select-sm" id="custom-${uniqueId}">`;
-                    item.customOpts.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
-                    html += `</select></div>`;
-                }
+            if (item.customOpts && item.customOpts.length > 0) {
+                html += `<div class="col-12"><select class="form-select form-select-sm" id="custom-${uniqueId}">`;
+                item.customOpts.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                html += `</select></div>`;
+            }
 
-                if (cat.allowCombo) {
-                    html += `
-                    <div class="col-12 mt-2 border-top pt-2">
-                        <label class="small fw-bold text-success d-block mb-1">🍱 升級套裝方案：</label>
-                        <div class="d-flex flex-column" style="gap: 6px;">
-                            <div class="form-check m-0">
-                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="none-${uniqueId}" value="0" checked onchange="toggleSauce('${uniqueId}', false)">
-                                <label class="small text-dark" for="none-${uniqueId}">
-                                    <strong>單點</strong>
-                                </label>
-                            </div>
-                            <div class="form-check m-0">
-                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboA-${uniqueId}" value="180" onchange="toggleSauce('${uniqueId}', true)">
-                                <label class="small text-dark" for="comboA-${uniqueId}">
-                                    <strong>+180元升級A套餐</strong> <br><span class="text-secondary" style="font-size:0.75rem;">(含沙拉、酥皮濃湯、甜點、100元飲料)</span>
-                                </label>
-                            </div>
-                            <div class="form-check m-0">
-                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB1-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
-                                <label class="small" for="comboB1-${uniqueId}">
-                                    <strong>+80元升級B套餐</strong> <br><span class="text-secondary" style="font-size:0.75rem;">(含沙拉、玉米濃湯)</span>
-                                </label>
-                            </div>
-                            <div class="form-check m-0">
-                                <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB2-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
-                                <label class="small" for="comboB2-${uniqueId}">
-                                    <strong>+80元升級B套餐</strong> <br><span class="text-secondary" style="font-size:0.75rem;">(含沙拉、甜點)</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="mt-2 d-none" id="sauce-box-${uniqueId}">
-                            <label class="small fw-bold text-secondary">🥗 套餐沙拉醬：</label>
-                            <div class="form-check form-check-inline ms-2">
-                                <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce1-${uniqueId}" value="千島醬" checked>
-                                <label class="form-check-label small" for="sauce1-${uniqueId}">千島醬</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce2-${uniqueId}" value="和風醬">
-                                <label class="form-check-label small" for="sauce2-${uniqueId}">和風醬</label>
-                            </div>
-                        </div>
-                    </div>`;
-                }
-
+            if (cat.allowCombo) {
                 html += `
-                            </div>
-                            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center mt-3" style="gap: 8px;">
-                                <div class="input-group input-group-sm mx-auto mx-sm-0" style="width: 100px;">
-                                    <button class="btn btn-outline-success" type="button" onclick="minusQty('${uniqueId}')">-</button>
-                                    <input type="number" class="form-control text-center fw-bold text-success p-0" id="qty-${uniqueId}" value="1" min="1" readonly>
-                                    <button class="btn btn-outline-success" type="button" onclick="plusQty('${uniqueId}')">+</button>
-                                </div>
-                                <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2" style="font-size: ${cat.isGrid ? '0.8rem' : '0.9rem'};" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false}, event)">
-                                    加入購物車
-                                </button>
-                            </div>
+                <div class="col-12 mt-2 border-top pt-2">
+                    <label class="small fw-bold text-success d-block mb-1">🍱 升級套裝方案：</label>
+                    <div class="d-flex flex-column" style="gap: 6px;">
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="none-${uniqueId}" value="0" checked onchange="toggleSauce('${uniqueId}', false)">
+                            <label class="small text-dark" for="none-${uniqueId}">
+                                <strong>單點</strong>
+                            </label>
+                        </div>
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboA-${uniqueId}" value="180" onchange="toggleSauce('${uniqueId}', true)">
+                            <label class="small text-dark" for="comboA-${uniqueId}">
+                                <strong>+180元升級A套餐</strong> <br><span class="text-secondary" style="font-size:0.75rem;">(含沙拉、酥皮濃湯、甜點、100元飲料)</span>
+                            </label>
+                        </div>
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB1-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
+                            <label class="small" for="comboB1-${uniqueId}">
+                                <strong>+80元升級B套餐</strong> <br><span class="text-secondary" style="font-size:0.75rem;">(含沙拉、玉米濃湯)</span>
+                            </label>
+                        </div>
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="radio" name="combo-${uniqueId}" id="comboB2-${uniqueId}" value="80" onchange="toggleSauce('${uniqueId}', true)">
+                            <label class="small" for="comboB2-${uniqueId}">
+                                <strong>+80元升級B套餐</strong> <br><span class="text-secondary" style="font-size:0.75rem;">(含沙拉、甜點)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-none" id="sauce-box-${uniqueId}">
+                        <label class="small fw-bold text-secondary">🥗 套餐沙拉醬：</label>
+                        <div class="form-check form-check-inline ms-2">
+                            <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce1-${uniqueId}" value="千島醬" checked>
+                            <label class="form-check-label small" for="sauce1-${uniqueId}">千島醬</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sauce-${uniqueId}" id="sauce2-${uniqueId}" value="和風醬">
+                            <label class="form-check-label small" for="sauce2-${uniqueId}">和風醬</label>
                         </div>
                     </div>
                 </div>`;
-            });
+            }
 
-            html += `</div>`; 
+            html += `
+                        </div>
+                        <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center mt-3" style="gap: 8px;">
+                            <div class="input-group input-group-sm mx-auto mx-sm-0" style="width: 100px;">
+                                <button class="btn btn-outline-success" type="button" onclick="minusQty('${uniqueId}')">-</button>
+                                <input type="number" class="form-control text-center fw-bold text-success p-0" id="qty-${uniqueId}" value="1" min="1" readonly>
+                                <button class="btn btn-outline-success" type="button" onclick="plusQty('${uniqueId}')">+</button>
+                            </div>
+                            <button class="btn btn-success btn-sm flex-grow-1 fw-bold rounded-3 py-2" style="font-size: ${cat.isGrid ? '0.8rem' : '0.9rem'};" onclick="pushToCart('${item.name}', ${item.price}, '${uniqueId}', ${cat.allowCombo || false}, ${cat.isFriedFood || false}, event)">
+                                加入購物車
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         });
+
+        html += `</div>`;
         container.innerHTML = html;
     }
 
@@ -595,18 +654,25 @@
         document.querySelectorAll('[id^="sauce-box-"]').forEach(box => { box.className = "mt-2 d-none"; });
     }
 
+    // 我要繼續加點按鈕：回歸大廳畫面
     function backToMenuAndReset() {
         localStorage.setItem('ld_current_view', 'menu');
         resetAllMenuInputs();
         
         const receipt = document.getElementById('receipt-layout');
         const main = document.getElementById('main-layout');
+        const hubView = document.getElementById('category-hub-view');
+        const itemsView = document.getElementById('category-items-view');
         
         receipt.classList.add('view-animate-out');
         
         setTimeout(() => {
             receipt.classList.add('d-none');
             receipt.classList.remove('view-animate-out');
+            
+            // 歸位：重置回大廳頁面
+            itemsView.classList.add('d-none');
+            hubView.classList.remove('d-none');
             
             main.classList.remove('d-none');
             main.classList.add('view-animate-out');
@@ -618,7 +684,6 @@
         }, 300);
     }
 
-    // 🌟【核心攔截優化】：根據累計金額，智慧控管低消防呆鎖定
     function updateCartUI() {
         const itemsDiv = document.getElementById('cart-items');
         const totalSpan = document.getElementById('cart-total');
@@ -641,7 +706,6 @@
             if(discountDiv) discountDiv.innerText = "";
             if(modalDiscountDiv) modalDiscountDiv.innerText = "";
             
-            // 空白時按鈕還原預設關閉
             if(submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "送出訂單到櫃檯"; }
             if(modalSubmitBtn) { modalSubmitBtn.disabled = true; modalSubmitBtn.innerText = "確認無誤 ─ 送出訂單"; }
             if(mobileBar) mobileBar.style.display = 'none';
@@ -684,7 +748,7 @@
         if(totalSpan) totalSpan.innerText = finalTotal;
         if(modalTotalSpan) modalTotalSpan.innerText = finalTotal;
 
-        // 🌟 核心防禦點：檢查實收金額是否符合最低消費 120 元限制
+        // 智慧控管低消防呆鎖定
         if (finalTotal < 120) {
             if(submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "❌ 未滿低消 $120 元"; }
             if(modalSubmitBtn) { modalSubmitBtn.disabled = true; modalSubmitBtn.innerText = "❌ 未滿低消 $120 元"; }
@@ -707,7 +771,6 @@
         
         const finalCalculatedPrice = parseInt(document.getElementById('cart-total').innerText || document.getElementById('modal-cart-total').innerText);
         
-        // 🌟 程式後端最後攔截線：確保發送出去前金額必定大於等於 120 元
         if (finalCalculatedPrice < 120) {
             alert("本桌消費金額未滿最低消費 $120 元，請繼續挑選餐點！");
             return;
@@ -817,6 +880,7 @@
     }
 </script>
 
+<!-- 引入 Bootstrap 5.3 核心腳本包 -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
